@@ -55,6 +55,10 @@
             <datalist id="classList"></datalist>
           </div>
           <div class="field">
+            <label for="signerInput">ID periset</label>
+            <input id="signerInput" type="text" placeholder="mis. S01" maxlength="16" style="width: 110px" />
+          </div>
+          <div class="field">
             <label for="frameCount">Jumlah frame</label>
             <input id="frameCount" type="number" value="12" min="3" max="60" style="width: 92px" />
           </div>
@@ -88,10 +92,13 @@
           <button id="clearBtn" class="btn btn-danger">Hapus semua</button>
         </div>
 
-        <div class="notice" style="margin-top: 16px">
-          Setelah cukup data (target <strong>≥ 300 sampel per kelas</strong>), ekspor CSV lalu
-          simpan ke <code>data/samples/</code> dan jalankan <code>python scripts/train.py</code>.
-          Data tersimpan di localStorage browser — <strong>ekspor rutin</strong> agar tidak hilang.
+        <div class="notice" style="margin-top: 14px">
+          Setiap rekaman diberi <strong>ID sesi otomatis</strong> dan <strong>ID periset</strong>.
+          Ini penting untuk teori data: model harus diuji pada periset yang belum pernah
+          dilihat sistem (<em>signer-independent</em>), kalau tidak akurasinya palsu.
+          Setelah cukup data (target <strong>≥ 300 sampel/kelas dari ≥ 3 periset</strong>),
+          ekspor CSV lalu simpan ke <code>data/samples/</code> dan jalankan
+          <code>python scripts/train.py</code>.
         </div>
       </section>
     </main>

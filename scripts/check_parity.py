@@ -50,8 +50,8 @@ def load_feature_rows(limit: int = 100) -> np.ndarray:
             reader = csv.reader(fh)
             next(reader, None)
             for row in reader:
-                if len(row) == 64:
-                    rows.append(row[1:])
+                if len(row) >= 64:
+                    rows.append(row[1:64])
     if not rows:
         raise SystemExit("Belum ada CSV di data/samples/ — jalankan make_sample_dataset.py dulu.")
     rng = np.random.default_rng(1)

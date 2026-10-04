@@ -146,6 +146,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--classes", nargs="*", help="Batasi kelas tertentu")
     parser.add_argument("--stride", type=int, default=5, help="Ambil 1 dari N frame video")
+    parser.add_argument("--signer", default="unknown",
+                        help="ID periset untuk seluruh file (dipakai bila folder tidak berisi subfolder periset)")
     parser.add_argument("--output", default="raw_dataset.csv", help="Nama file CSV output")
     args = parser.parse_args()
 
@@ -166,7 +168,9 @@ def main() -> int:
 
     SAMPLES_DIR.mkdir(parents=True, exist_ok=True)
     out_path = SAMPLES_DIR / args.output
-    header = ["class"] + [f"f{i}" for i in range(FEATURE_DIM)]
+    # Kolom tambahan session & signer wajib ada agar split signer-independent
+    # bisa dilakukan (lihat docs/DATA.md).
+    header = ["class"] + [f"f{i}" for i in range(FEATURE_DIM)] + ["session", "signer"]
 
     total = 0
     skipped = 0
@@ -178,22 +182,27 @@ def main() -> int:
 
         for class_dir in class_dirs:
             label = class_dir.name
-            files = sorted(p for p in class_dir.iterdir() if p.is_file())
+            files = sorted(p for p in class_dir.rglob("*") if p.is_file())
             for path in files:
                 suffix = path.suffix.lower()
+
+                # Konvensi opsional: data/raw/<KELAS>/<SIGNER>/file → signer dari subfolder.
+                rel = path.relative_to(class_dir)
+                signer = rel.parts[0] if len(rel.parts) > 1 else args.signer
+                session = f"{signer}:{path.stem}"
 
                 if suffix in IMAGE_EXTS:
                     feats = extract_from_image(path, landmarker, mp)
                     if feats is None:
                         skipped += 1
                         continue
-                    writer.writerow([label] + feats.flatten().tolist())
+                    writer.writerow([label] + feats.flatten().tolist() + [session, signer])
                     counts[label] = counts.get(label, 0) + 1
                     total += 1
 
                 elif suffix in VIDEO_EXTS:
                     for feats in extract_from_video(path, lambda: build_landmarker()[1], mp, args.stride):
-                        writer.writerow([label] + feats.flatten().tolist())
+                        writer.writerow([label] + feats.flatten().tolist() + [session, signer])
                         counts[label] = counts.get(label, 0) + 1
                         total += 1
 

@@ -24,7 +24,9 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "samples" / "synthetic.csv"
 
 CLASSES = ["A", "B", "C", "D", "E"]
-SAMPLES_PER_CLASS = 250
+SIGNERS = ["S01", "S02", "S03", "S04", "S05"]
+SAMPLES_PER_CLASS_PER_SIGNER = 50
+SESSIONS_PER_PAIR = 2
 SEED = 7
 
 
@@ -50,25 +52,36 @@ def main() -> int:
     rng = np.random.default_rng(SEED)
     OUT.parent.mkdir(parents=True, exist_ok=True)
 
+    # Setiap periset punya "gaya" tersendiri + prototipe kelas, sehingga split
+    # signer-independent benar-benar menguji generalisasi antar-individu.
+    signer_bias = {s: rng.normal(0.0, 0.15, size=(NUM_LANDMARKS, 3)) for s in SIGNERS}
     prototypes = {c: prototype(rng) for c in CLASSES}
 
     rows: list[list] = []
-    for cls in CLASSES:
-        proto = prototypes[cls]
-        for _ in range(SAMPLES_PER_CLASS):
-            rotated = proto @ rotation_matrix(rng).T
-            noisy = rotated + rng.normal(0.0, 0.02, size=rotated.shape)
-            rows.append([cls] + normalize_landmarks(noisy).flatten().tolist())
+    for signer in SIGNERS:
+        for cls in CLASSES:
+            proto = prototypes[cls] + signer_bias[signer]
+            per_session = SAMPLES_PER_CLASS_PER_SIGNER // SESSIONS_PER_PAIR
+
+            for session_idx in range(SESSIONS_PER_PAIR):
+                session = f"{signer}-ses{session_idx + 1}"
+                for _ in range(per_session):
+                    rotated = proto @ rotation_matrix(rng).T
+                    noisy = rotated + rng.normal(0.0, 0.02, size=rotated.shape)
+                    feats = normalize_landmarks(noisy).flatten().tolist()
+                    rows.append([cls] + feats + [session, signer])
 
     rng.shuffle(rows)
 
     with OUT.open("w", newline="") as fh:
         writer = csv.writer(fh)
-        writer.writerow(["class"] + [f"f{i}" for i in range(FEATURE_DIM)])
+        writer.writerow(["class"] + [f"f{i}" for i in range(FEATURE_DIM)] + ["session", "signer"])
         writer.writerows(rows)
 
-    print(f"{len(rows)} sampel sintetis ({len(CLASSES)} kelas) → {OUT}")
-    print("Jalankan: python scripts/train.py")
+    print(
+        f"{len(rows)} sampel sintetis ({len(CLASSES)} kelas × {len(SIGNERS)} periset) → {OUT}"
+    )
+    print("Jalankan: python scripts/train.py  (atau --group-column signer untuk split SI)")
     return 0
 
 

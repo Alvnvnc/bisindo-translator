@@ -60,7 +60,8 @@ uv pip install -r requirements.txt
 
 # 3. Uji pipeline dengan data sintetis (sekali saja, untuk memastikan alurnya jalan)
 python scripts/make_sample_dataset.py
-python scripts/train.py
+python scripts/audit_dataset.py     # checklist kualitas data
+python scripts/train.py             # split default: signer-independent
 
 # 4. Verifikasi Python ↔ JavaScript menghasilkan angka yang sama
 python scripts/check_parity.py
@@ -89,7 +90,8 @@ python -m http.server 8000
 │   └── samples/               # CSV landmark: class,f0..f62  ← input training
 ├── scripts/
 │   ├── extract_landmarks.py   # gambar/video → CSV landmark (MediaPipe Python)
-│   ├── train.py               # latih + evaluasi + ekspor web/model.json
+│   ├── audit_dataset.py       # audit kualitas data sebelum training
+│   ├── train.py               # latih + evaluasi (split signer-independent) + ekspor model
 │   ├── make_sample_dataset.py # data sintetis untuk smoke test pipeline
 │   ├── check_parity.py        # uji Python ↔ JS (jalankan tiap ubah normalisasi/model)
 │   └── check_parity.mjs
@@ -102,8 +104,9 @@ python -m http.server 8000
 │   ├── hands.js               # wrapper MediaPipe Tasks Vision
 │   ├── model.json             # hasil training (ikut di-commit agar demo bisa di-deploy)
 │   └── style.css
-├── reports/                   # metrik evaluasi tiap run training (tidak masuk git)
+├── reports/                   # metrik training & laporan audit data (tidak masuk git)
 └── docs/
+    ├── DATA.md                # panduan persiapan data: sumber, protokol, etika, QC
     ├── PLAN.md                # sprint 5 hari + aturan de-risking
     └── devpost-submission.md  # template submission Devpost
 ```
@@ -115,12 +118,18 @@ python -m http.server 8000
 Semua sumber data bermuara ke satu format CSV di `data/samples/`:
 
 ```
-class,f0,f1,f2,...,f62
-A,0.123,-0.456,...
+class,f0,f1,...,f62,session,signer
+A,0.123,-0.456,...,ses-20261005-1200-abc,S01
 ```
 
 - `class` — label isyarat (mis. huruf alfabet `A`–`Z`)
 - `f0..f62` — 21 landmark × 3 koordinat (x, y, z), **sudah dinormalisasi**
+- `session` — ID sesi rekaman (satu kali tekan "Rekam"); kolom opsional
+- `signer` — ID periset; **wajib untuk evaluasi yang jujur** (split signer-independent)
+
+Kolom `session`/`signer` dibaca berdasarkan nama header, jadi CSV lama tanpa
+keduanya tetap bisa dipakai. Aturan lengkap persiapan data (cara mencari dataset,
+protokol merekam, konvensi labeling, etika) ada di **[`docs/DATA.md`](docs/DATA.md)**.
 
 Normalisasi (wajib identik antara Python dan JS — lihat `scripts/train.py` dan
 `web/app.js`):
@@ -137,11 +146,13 @@ pengguna (anak-anak vs dewasa).
 ## Status
 
 - [x] Scaffold pipeline: landmark → training → ekspor → inference di browser
-- [x] Alat rekam dataset (`web/capture.html`) + ekspor/impor CSV
+- [x] Alat rekam dataset (`web/capture.html`) + metadata periset/sesi + ekspor/impor CSV
+- [x] Audit kualitas data otomatis (`scripts/audit_dataset.py`)
+- [x] Split signer-independent & augmentasi sesuai teori (`scripts/train.py`)
 - [x] Uji paritas Python ↔ JavaScript (`scripts/check_parity.py`) — lulus
 - [x] Demo UI dasar: huruf besar, indikator keyakinan, transkrip, TTS `id-ID`
-- [ ] Dataset huruf alfabet BISINDO (target: ≥ 300 sampel/kelas)
-- [ ] Akurasi ≥ 85% pada test split dengan data nyata
+- [ ] Dataset huruf alfabet BISINDO (target: ≥ 300 sampel/kelas dari ≥ 3 periset)
+- [ ] Akurasi ≥ 85% pada split **signer-independent** dengan data nyata
 - [ ] Uji dengan pengguna asli + video demo
 - [ ] Mode latihan & frasa layanan (stretch)
 - [ ] Deploy live demo + submission Devpost

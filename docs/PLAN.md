@@ -21,16 +21,18 @@ Kedalaman eksekusi > banyaknya fitur.
 ## Hari per hari
 
 ### 5 Okt — Data & pipeline
+- [ ] Baca [`DATA.md`](DATA.md) — spesifikasi data, katalog sumber, protokol rekam, etika
 - [ ] Setup venv, install dependency, jalankan smoke test sintetis
-- [ ] Unduh/verifikasi dataset BISINDO (cek lisensinya! catat di `ATTRIBUTIONS.md`)
-- [ ] Uji `web/capture.html` → rekam 2–3 kelas dulu untuk memastikan alurnya jalan
-- [ ] Target hari ini: pipeline `rekam → train → demo browser` terbukti end-to-end
+- [ ] Uji `web/capture.html` → rekam 2–3 kelas dulu untuk memastikan alurnya nyaman
+- [ ] Unduh 1 dataset publik kandidat + verifikasi lisensinya (catat di `ATTRIBUTIONS.md`)
+- [ ] Target hari ini: pipeline `rekam → audit → train (SI) → demo browser` terbukti end-to-end
 
-### 6 Okt — Model
-- [ ] Rekam/ekstrak seluruh 26 huruf (target ≥ 300 sampel/kelas)
+### 6 Okt — Produksi data & model
+- [ ] Rekam 3 periset × 26 huruf × ≥ 2 sesi (target ≥ 300 sampel/kelas; minimal 150 dulu)
+- [ ] `python scripts/audit_dataset.py` → bersihkan duplikat/outlier/kelas timpang
 - [ ] Latih model, bandingkan KNN vs MLP vs RF
-- [ ] **Checkpoint akurasi ≥ 85%** pada test split
-- [ ] Analisis kelas yang paling sering tertukar → tambah sampel untuk kelas itu
+- [ ] **Checkpoint akurasi ≥ 85% pada split signer-independent** (`--group-column signer`)
+- [ ] Analisis kelas yang paling sering tertukar → tambah variasi data untuk kelas itu
 
 ### 7 Okt — UI/UX
 - [ ] Polish tampilan (gunakan referensi Mobbin untuk pola UI yang matang)

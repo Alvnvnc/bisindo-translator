@@ -1,5 +1,15 @@
 /**
  * Alat perekam dataset: webcam → landmark → localStorage → CSV.
+ *
+ * Setiap sampel menyimpan metadata sesuai teori pembuatan dataset:
+ *   - f   : 63 fitur landmark ternormalisasi
+ *   - ses : ID sesi rekaman (satu sesi = satu kali tekan Rekam)
+ *   - s   : ID periset/signer
+ *
+ * Metadata ini bukan hiasan — tanpa ID periset, model tidak bisa dievaluasi
+ * secara signer-independent (diuji pada orang yang belum pernah dilihat),
+ * sehingga akurasi yang dilaporkan akan menyesatkan.
+ *
  * CSV yang dihasilkan identik formatnya dengan scripts/extract_landmarks.py,
  * jadi data rekaman sendiri dan dataset gambar bisa digabung untuk training.
  */
@@ -8,6 +18,7 @@ import { normalizeLandmarks } from "./landmarks.js";
 import { createHandLandmarker, startCamera, stopCamera, drawHand } from "./hands.js";
 
 const STORAGE_KEY = "handtalk.samples.v1";
+const SIGNER_KEY = "handtalk.signer";
 const FEATURE_DIM = 63;
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -21,6 +32,7 @@ const startBtn = $("startBtn");
 const stopBtn = $("stopBtn");
 const recordBtn = $("recordBtn");
 const classInput = $("classInput");
+const signerInput = $("signerInput");
 const frameCountInput = $("frameCount");
 const progressFill = $("progressFill");
 const recordStatus = $("recordStatus");
@@ -43,21 +55,40 @@ const state = {
 
 /* ------------------------------ penyimpanan ------------------------------ */
 
+function newSessionId() {
+  const now = new Date();
+  const stamp = now.toISOString().slice(0, 16).replace(/[-:T]/g, "");
+  const rand = Math.random().toString(36).slice(2, 6);
+  return `ses-${stamp}-${rand}`;
+}
+
 function loadStore() {
+  let raw;
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    raw = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
   } catch {
     return {};
   }
+
+  // Migrasi format lama (array fitur polos) → format ber-metadata.
+  const store = {};
+  for (const [label, entries] of Object.entries(raw)) {
+    store[label] = entries.map((e) =>
+      Array.isArray(e) ? { f: e, ses: "legacy", s: "unknown" } : e,
+    );
+  }
+  return store;
 }
 
 function saveStore(store) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
 }
 
-function addSamples(label, samples) {
+function addSamples(label, samples, session, signer) {
   const store = loadStore();
-  store[label] = (store[label] || []).concat(samples);
+  store[label] = (store[label] || []).concat(
+    samples.map((f) => ({ f, ses: session, s: signer })),
+  );
   saveStore(store);
   renderTable();
 }
@@ -77,13 +108,16 @@ function renderTable() {
   let total = 0;
 
   for (const label of labels) {
-    const n = store[label].length;
+    const entries = store[label];
+    const n = entries.length;
     total += n;
+    const signers = new Set(entries.map((e) => e.s || "unknown"));
+    const signerInfo = signers.size ? `${signers.size} periset` : "tanpa metadata";
 
     const tr = document.createElement("tr");
-    const pillClass = n >= 300 ? "pill" : n >= 100 ? "pill pill-warn" : "pill pill-warn";
+    const pillClass = n >= 300 ? "pill" : "pill pill-warn";
     tr.innerHTML = `
-      <td><strong>${escapeHtml(label)}</strong></td>
+      <td><strong>${escapeHtml(label)}</strong><br /><span class="hint">${escapeHtml(signerInfo)}</span></td>
       <td class="num"><span class="${pillClass}">${n}</span></td>
       <td class="num"><button class="btn btn-small btn-danger" data-del="${escapeHtml(label)}">Hapus</button></td>
     `;
@@ -174,7 +208,11 @@ async function record() {
     return;
   }
 
+  const signer = signerInput.value.trim() || "unknown";
+  localStorage.setItem(SIGNER_KEY, signer);
+
   const target = Math.max(3, Math.min(60, parseInt(frameCountInput.value, 10) || 12));
+  const session = newSessionId();
   const collected = [];
   state.recording = true;
   recordBtn.disabled = true;
@@ -234,8 +272,8 @@ async function record() {
   progressFill.style.width = "0%";
 
   if (collected.length) {
-    addSamples(label, collected);
-    setStatus(`${collected.length} sampel ditambahkan ke kelas "${label}".`, "ok");
+    addSamples(label, collected, session, signer);
+    setStatus(`${collected.length} sampel → kelas "${label}" · sesi ${session} · periset ${signer}.`, "ok");
     classInput.value = nextClass(label);
   }
 }
@@ -257,6 +295,8 @@ function nextClass(label) {
 
 /* ------------------------------ ekspor/impor ----------------------------- */
 
+const EXTRA_COLUMNS = ["session", "signer"];
+
 function exportCsv() {
   const store = loadStore();
   const labels = Object.keys(store).sort();
@@ -265,20 +305,26 @@ function exportCsv() {
     return;
   }
 
-  const header = ["class", ...Array.from({ length: FEATURE_DIM }, (_, i) => `f${i}`)];
+  const header = [
+    "class",
+    ...Array.from({ length: FEATURE_DIM }, (_, i) => `f${i}`),
+    ...EXTRA_COLUMNS,
+  ];
   const lines = [header.join(",")];
   let total = 0;
 
   for (const label of labels) {
-    for (const feats of store[label]) {
-      lines.push([csvEscape(label), ...feats.map((v) => v.toFixed(6))].join(","));
+    for (const entry of store[label]) {
+      lines.push(
+        [csvEscape(label), ...entry.f.map((v) => v.toFixed(6)), csvEscape(entry.ses), csvEscape(entry.s)].join(","),
+      );
       total += 1;
     }
   }
 
   const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
   downloadBlob(new Blob([lines.join("\n")], { type: "text/csv" }), `handtalk_samples_${stamp}.csv`);
-  setStatus(`${total} sampel diekspor. Simpan ke data/samples/.`, "ok");
+  setStatus(`${total} sampel diekspor (dengan session & signer). Simpan ke data/samples/.`, "ok");
 }
 
 function csvEscape(value) {
@@ -305,21 +351,28 @@ async function importCsv(file) {
   }
 
   const header = lines[0].split(",");
-  if (header[0] !== "class" || header.length !== FEATURE_DIM + 1) {
-    setStatus("Format CSV tidak dikenali (butuh kolom class,f0..f62).", "err");
+  if (header[0] !== "class" || header.length < FEATURE_DIM + 1) {
+    setStatus("Format CSV tidak dikenali (butuh kolom class,f0..f62[,session,signer]).", "err");
     return;
   }
+
+  const sessionIdx = header.indexOf("session");
+  const signerIdx = header.indexOf("signer");
 
   const store = loadStore();
   let added = 0;
 
   for (const line of lines.slice(1)) {
     const cells = line.split(",");
-    if (cells.length !== FEATURE_DIM + 1) continue;
+    if (cells.length !== header.length) continue;
     const label = cells[0].replace(/^"|"$/g, "").trim().toUpperCase();
-    const feats = cells.slice(1).map(Number);
+    const feats = cells.slice(1, FEATURE_DIM + 1).map(Number);
     if (!label || feats.some(Number.isNaN)) continue;
-    store[label] = (store[label] || []).concat([feats]);
+
+    const ses = sessionIdx >= 0 ? cells[sessionIdx].replace(/^"|"$/g, "") : "imported";
+    const signer = signerIdx >= 0 ? cells[signerIdx].replace(/^"|"$/g, "") : "unknown";
+
+    store[label] = (store[label] || []).concat([{ f: feats, ses, s: signer }]);
     added += 1;
   }
 
@@ -331,6 +384,8 @@ async function importCsv(file) {
 /* -------------------------------- wiring -------------------------------- */
 
 $("classList").innerHTML = ALPHABET.map((c) => `<option value="${c}">`).join("");
+
+signerInput.value = localStorage.getItem(SIGNER_KEY) || "";
 
 startBtn.addEventListener("click", start);
 stopBtn.addEventListener("click", stop);
