@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Data mentah berukuran besar (jangan masuk git)
+data/raw/
+data/samples/*.csv
+!data/samples/.gitkeep
+
+# Model MediaPipe yang diunduh otomatis oleh scripts/extract_landmarks.py
+models/
+
+# Artefak training (laporan metrik tidak perlu masuk git)
+reports/
+
+# CATATAN: web/model.json SENGAJA di-commit — file ini dibutuhkan agar demo web
+# (GitHub Pages / Vercel) bisa berjalan. Di-regenerate oleh scripts/train.py.
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Rahasia
+.env

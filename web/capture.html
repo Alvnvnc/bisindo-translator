@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HandTalk ID — Rekam Dataset</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">🎥</span>
+        <div>
+          <h1>Rekam Dataset</h1>
+          <p class="brand-sub">Kumpulkan sampel landmark tangan untuk training</p>
+        </div>
+      </div>
+      <a class="btn btn-small" href="index.html">← Demo</a>
+    </header>
+
+    <main class="layout capture-grid">
+      <!-- Kiri: kamera + rekam -->
+      <section class="card">
+        <div class="mirror" id="mirror">
+          <video id="video" playsinline muted></video>
+          <canvas id="overlay"></canvas>
+        </div>
+
+        <div class="row" style="margin-top: 14px">
+          <button id="startBtn" class="btn btn-primary">Mulai kamera</button>
+          <button id="stopBtn" class="btn" disabled>Berhenti</button>
+        </div>
+        <p class="status" id="camStatus">Kamera belum aktif.</p>
+
+        <div class="notice" style="margin-top: 14px">
+          Saat merekam, <strong>gerakkan tangan perlahan</strong> (geser posisi, ubah jarak,
+          putar sedikit) supaya model tidak hafal satu pose saja. Variasi pencahayaan dan
+          latar juga membantu.
+        </div>
+      </section>
+
+      <!-- Kanan: perekaman + daftar kelas -->
+      <section class="card">
+        <div class="row">
+          <div class="field" style="flex: 1">
+            <label for="classInput">Kelas (label isyarat)</label>
+            <input
+              id="classInput"
+              type="text"
+              list="classList"
+              placeholder="mis. A"
+              autocomplete="off"
+              maxlength="24"
+            />
+            <datalist id="classList"></datalist>
+          </div>
+          <div class="field">
+            <label for="frameCount">Jumlah frame</label>
+            <input id="frameCount" type="number" value="12" min="3" max="60" style="width: 92px" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top: 12px">
+          <button id="recordBtn" class="btn btn-primary" disabled>● Rekam</button>
+          <span class="hint" id="recordHint">Aktifkan kamera dulu.</span>
+        </div>
+        <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+        <p class="status" id="recordStatus"></p>
+
+        <h2 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+                   color: var(--text-dim); margin: 22px 0 8px">
+          Dataset tersimpan di browser
+        </h2>
+        <table class="classes">
+          <thead>
+            <tr><th>Kelas</th><th style="text-align: right">Sampel</th><th style="text-align: right">Aksi</th></tr>
+          </thead>
+          <tbody id="classRows"></tbody>
+        </table>
+        <p class="status" id="totalStatus"></p>
+
+        <div class="row" style="margin-top: 16px">
+          <button id="exportBtn" class="btn">⬇ Ekspor CSV</button>
+          <label class="btn" style="cursor: pointer">
+            ⬆ Impor CSV
+            <input id="importInput" type="file" accept=".csv" hidden />
+          </label>
+          <button id="clearBtn" class="btn btn-danger">Hapus semua</button>
+        </div>
+
+        <div class="notice" style="margin-top: 16px">
+          Setelah cukup data (target <strong>≥ 300 sampel per kelas</strong>), ekspor CSV lalu
+          simpan ke <code>data/samples/</code> dan jalankan <code>python scripts/train.py</code>.
+          Data tersimpan di localStorage browser — <strong>ekspor rutin</strong> agar tidak hilang.
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>HandTalk ID · alat perekaman dataset</span>
+      <span>Landmark diekstrak on-device, hanya vektor 63-dimensi yang disimpan</span>
+    </footer>
+
+    <script type="module" src="capture.js"></script>
+  </body>
+</html>

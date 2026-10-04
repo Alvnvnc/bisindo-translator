@@ -1,0 +1,6 @@
+# Python 3.12 — MediaPipe belum mendukung 3.13+
+mediapipe>=0.10.14
+numpy>=1.26
+scikit-learn>=1.4
+opencv-python>=4.9
+matplotlib>=3.8
