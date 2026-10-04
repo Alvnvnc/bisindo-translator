@@ -62,7 +62,6 @@ uv pip install -r requirements.txt
 python scripts/make_sample_dataset.py
 python scripts/audit_dataset.py     # checklist kualitas data
 python scripts/train.py             # split default: signer-independent
-
 # 4. Verifikasi Python ↔ JavaScript menghasilkan angka yang sama
 python scripts/check_parity.py
 
@@ -91,8 +90,9 @@ python -m http.server 8000
 ├── scripts/
 │   ├── extract_landmarks.py   # gambar/video → CSV landmark (MediaPipe Python)
 │   ├── audit_dataset.py       # audit kualitas data sebelum training
+│   ├── generate_synthetic.py  # data sintetis real-anchored (mixup/pca)
 │   ├── train.py               # latih + evaluasi (split signer-independent) + ekspor model
-│   ├── make_sample_dataset.py # data sintetis untuk smoke test pipeline
+│   ├── make_sample_dataset.py # data sintetis mainan untuk smoke test pipeline
 │   ├── check_parity.py        # uji Python ↔ JS (jalankan tiap ubah normalisasi/model)
 │   └── check_parity.mjs
 ├── web/
@@ -148,6 +148,7 @@ pengguna (anak-anak vs dewasa).
 - [x] Scaffold pipeline: landmark → training → ekspor → inference di browser
 - [x] Alat rekam dataset (`web/capture.html`) + metadata periset/sesi + ekspor/impor CSV
 - [x] Audit kualitas data otomatis (`scripts/audit_dataset.py`)
+- [x] Data sintetis real-anchored (`scripts/generate_synthetic.py`) — hanya untuk train
 - [x] Split signer-independent & augmentasi sesuai teori (`scripts/train.py`)
 - [x] Uji paritas Python ↔ JavaScript (`scripts/check_parity.py`) — lulus
 - [x] Demo UI dasar: huruf besar, indikator keyakinan, transkrip, TTS `id-ID`

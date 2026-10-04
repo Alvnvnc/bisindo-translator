@@ -241,6 +241,65 @@ dan diverifikasi tidak bocor ke test (bandingkan hash/indeks).
 
 ---
 
+## 7b. Data sintetis — metode komunitas & aturan pakai
+
+**Prinsip dasar dari literatur:** sintetis hanya membantu bila **real-anchored**
+(dijalankan dari data nyata, bukan dari nol). Tanpa jangkar nyata, model belajar
+halusinasi generatornya. (arXiv 2605.09699 — *When Does Synthetic Pose Data Help?*)
+
+### Metode yang dipakai komunitas (dari termurah ke termahal)
+
+| # | Metode | Cara kerja | Catatan untuk kita |
+|---|---|---|---|
+| 1 | Augmentasi prosedural | Rotasi/noise di ruang landmark | Sudah ada (`--augment`); tidak menambah mode gerakan baru |
+| 2 | Interpolasi dalam kelas (MixUp) | `λ·x_a + (1−λ)·x_b`, `x_a,x_b` satu kelas & berdekatan | Aman & murah; batasi ke tetangga terdekat agar tidak menjembatani dua gaya gerakan |
+| 3 | Model generatif statistik | PCA per kelas + sampling Gaussian di ruang komponen | Yang kita implementasikan (`generate_synthetic.py`); ringan, tanpa GPU |
+| 4 | GAN / VAE / Diffusion pada skeleton | Generator dilatih pada data nyata (mis. *Skeleton-Based Data Augmentation using Adversarial Learning*; pose GAN di Frontiers 2024) | Butuh data & waktu jauh lebih banyak; risiko mode collapse. Tidak untuk sprint 5 hari |
+| 5 | *Sign stitching* / SLP-based | Menyambung segmen isyarat untuk membuat sampel baru (arXiv 2506.09643, 2508.14345) | Untuk isyarat berurutan (kata/kalimat). Pretraining sintetis bisa melampaui augmentasi biasa — relevan untuk v2 |
+| 6 | Video generatif (mis. Firefly) | Menghasilkan video isyarat dari prompt | Studi MDPI 2025: sulit mendapatkan isyarat yang benar via prompt — **tidak dapat diandalkan untuk akurasi**, hanya untuk ilustrasi |
+
+### Yang justru TIDAK disarankan: SMOTE
+
+Konsensus komunitas untuk data tabular/fitur (seperti landmark 63-d kita):
+SMOTE tidak membantu classifier modern, **merusak kalibrasi probabilitas**, dan
+lemah pada data kecil / kelas yang kompleks (diskusi r/MachineLearning; C. Molnar
+"Don't fix your imbalanced data"; review PMC10789107). Karena itu kita **tidak
+memakai SMOTE** — kita pakai metode 1–3 di atas.
+
+### Aturan pakai di proyek ini (ditegakkan oleh kode)
+
+1. **Sintetis tidak pernah masuk test.** `scripts/generate_synthetic.py` menandai
+   semua sampel dengan `signer='synthetic'`; `scripts/train.py` hanya menerimanya
+   ke train via `--include-synthetic`, dan test selalu 100% data nyata.
+2. **CV dilaporkan pada data nyata saja** — angka sintetis tidak pernah jadi bukti.
+3. **Batas dilusi** — maksimum 2× jumlah nyata per kelas (`--max-fraction`);
+   kelas dengan < 20 data nyata dilewati.
+4. **Kontrol kualitas otomatis** — generator menolak dipakai bila label-match < 95%
+   atau rasio jarak sintetis/nyata > 1.5.
+5. **Bukan pengganti data nyata** — kalau akurasi signer-independent tidak naik,
+   matikan sintetis. Jangan pernah melaporkan metrik dari test sintetis.
+
+### Cara pakai
+
+```bash
+# Periksa dulu tanpa menulis file
+python scripts/generate_synthetic.py --dry-run
+
+# Hasilkan (default: mixup + pca, maksimal 2× data nyata per kelas)
+python scripts/generate_synthetic.py
+
+# Latih: sintetis hanya menambah train
+python scripts/train.py --include-synthetic
+
+# Bandikan dengan baseline nyata saja (default)
+python scripts/train.py
+```
+
+Cek hasilnya lewat audit — seksi "7. DATA SINTETIS" akan menampilkan porsi &
+peringatan bila sintetis mendominasi.
+
+---
+
 ## 8. QC otomatis: `scripts/audit_dataset.py`
 
 Jalankan SEBELUM setiap training serius:

@@ -323,20 +323,38 @@ def main() -> int:
                         help="Ekspor model yang dilatih ulang pada seluruh data")
     parser.add_argument("--augment", type=int, default=0,
                         help="Jumlah salinan augmentasi (rotasi kecil + noise) per sampel training; 0 = mati")
+    parser.add_argument("--include-synthetic", action="store_true",
+                        help="Pakai sampel signer='synthetic' pada TRAIN saja (test selalu data nyata)")
     args = parser.parse_args()
 
     X, y, classes, meta = load_samples()
 
-    counts = Counter(y.tolist())
-    print("Distribusi kelas:", {classes[k]: v for k, v in sorted(counts.items())})
+    # --- Pisahkan data nyata vs sintetis --------------------------------------
+    # Aturan mutlak (docs/DATA.md §7b): evaluasi hanya pada data nyata.
+    synth_mask = np.array([s.lower().startswith("synth") for s in meta["signer"]])
+    n_synth = int(synth_mask.sum())
+    use_synth = n_synth > 0 and args.include_synthetic
+
+    if n_synth and args.include_synthetic:
+        print(f"Data sintetis   : {n_synth} sampel → TRAIN saja, test tetap 100% nyata")
+    elif n_synth:
+        print(f"Data sintetis   : {n_synth} sampel diabaikan "
+              "(jalankan dengan --include-synthetic untuk memakainya di train)")
+
+    keep_real = ~synth_mask
+    X_real, y_real = X[keep_real], y[keep_real]
+    meta_real = {k: [v for v, keep in zip(meta[k], keep_real.tolist()) if keep] for k in meta}
+
+    counts = Counter(y_real.tolist())
+    print("Distribusi kelas (nyata):", {classes[k]: v for k, v in sorted(counts.items())})
     if min(counts.values()) < 5:
-        print("\n⚠ Ada kelas dengan < 5 sampel — cross-validation tidak bisa dipercaya.")
+        print("\n⚠ Ada kelas dengan < 5 sampel nyata — cross-validation tidak bisa dipercaya.")
         print("  Tambah data dulu lewat web/capture.html.\n")
 
     # --- Tentukan grup untuk split (teori: uji pada individu yang belum dilihat) ---
     groups = None
     if args.group_column != "none":
-        values = meta.get(args.group_column, [])
+        values = meta_real.get(args.group_column, [])
         valid = {v for v in values if v and v != "unknown"}
         if len(valid) >= 2:
             groups = np.array(values)
@@ -347,18 +365,28 @@ def main() -> int:
                   "akurasi akan terlalu optimistis. Rekam data dengan ID periset berbeda.")
 
     X_train, X_test, y_train, y_test, g_train, g_test, split_info = make_split(
-        X, y, groups, args.test_size
+        X_real, y_real, groups, args.test_size
     )
     print(f"Protokol split : {split_info['protocol']}")
     if split_info["test_groups"]:
         print(f"Grup uji       : {', '.join(split_info['test_groups'])} (tidak dilihat saat training)")
 
+    # --- Bangun himpunan fitting: train nyata (+ sintetis + augmentasi) --------
+    X_fit, y_fit, g_fit = X_train, y_train, g_train
+    if use_synth:
+        X_syn, y_syn = X[synth_mask], y[synth_mask]
+        X_fit = np.vstack([X_fit, X_syn])
+        y_fit = np.concatenate([y_fit, y_syn])
+        if g_fit is not None:
+            g_fit = np.concatenate([g_fit, np.full(len(X_syn), "synthetic", dtype=object)])
+        print(f"Himpunan fitting: {len(X_train)} nyata + {len(X_syn)} sintetis = {len(X_fit)} sampel")
+
     # Augmentasi HANYA untuk train — test set tidak boleh disentuh (docs/DATA.md §7).
     if args.augment > 0:
-        n_before = len(X_train)
-        X_train, y_train, g_train = augment_training_set(X_train, y_train, g_train, args.augment)
+        n_before = len(X_fit)
+        X_fit, y_fit, g_fit = augment_training_set(X_fit, y_fit, g_fit, args.augment)
         print(f"Augmentasi     : {args.augment}× (rotasi ±12° + noise) → "
-              f"{n_before} menjadi {len(X_train)} sampel train; test tidak diaugmentasi")
+              f"{n_before} menjadi {len(X_fit)} sampel train; test tidak diaugmentasi")
 
     candidates = build_candidates()
     if args.model != "auto":
@@ -368,11 +396,11 @@ def main() -> int:
     fitted: dict[str, object] = {}
     for name, model in candidates.items():
         print(f"\nMelatih {name} ...")
-        score = cv_score(model, X_train, y_train, g_train)
-        model.fit(X_train, y_train)
+        score = cv_score(model, X_train, y_train, g_train)  # CV pada data nyata saja
+        model.fit(X_fit, y_fit)
         results[name] = score
         fitted[name] = model
-        print(f"  CV accuracy: {score:.4f}")
+        print(f"  CV accuracy (nyata): {score:.4f}")
 
     best_name = max(results, key=lambda k: results[k])
     best = fitted[best_name]
@@ -402,10 +430,10 @@ def main() -> int:
     # --- Ekspor untuk browser -------------------------------------------------
     if args.export_train_set:
         final = build_candidates()[best_name]
-        final.fit(X, y)
-        export_model, export_X, export_y = final, X, y
+        final.fit(X_fit, y_fit)
+        export_model, export_X, export_y = final, X_fit, y_fit
     else:
-        export_model, export_X, export_y = best, X_train, y_train
+        export_model, export_X, export_y = best, X_fit, y_fit
 
     if best_name == "knn":
         payload = export_knn(export_model, export_X, export_y, classes)
@@ -434,6 +462,10 @@ def main() -> int:
         MODEL_OUT.write_text(json.dumps(payload, separators=(",", ":")))
         size_kb = MODEL_OUT.stat().st_size / 1024
         print(f"\nModel diekspor ke {MODEL_OUT} ({size_kb:.0f} KB)")
+        if size_kb > 1500:
+            print("  ⚠ Model besar — halaman demo akan lambat dimuat. Pertimbangkan:")
+            print("    - --model mlp  (ukuran tetap ±300 KB, tidak tumbuh dengan jumlah data)")
+            print("    - kurangi jumlah sampel sintetis/augmentasi untuk KNN")
 
     # --- Simpan laporan -------------------------------------------------------
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -447,6 +479,8 @@ def main() -> int:
         "class_counts": {classes[k]: v for k, v in counts.items()},
         "split": split_info,
         "augment_copies": args.augment,
+        "synthetic": {"available": n_synth, "used_in_train": use_synth,
+                      "n_in_train": n_synth if use_synth else 0},
         "classification_report": report,
         "confusion_matrix": cm.tolist(),
     }

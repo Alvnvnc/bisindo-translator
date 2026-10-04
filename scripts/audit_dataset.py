@@ -215,6 +215,27 @@ def check_confusability(samples: list[dict]) -> dict:
     return {"closest_pairs": pairs[:10]}
 
 
+def check_synthetic(samples: list[dict]) -> dict:
+    """Ringkas porsi data sintetis — pengingat aturan: sintetis tidak untuk test."""
+    per_class = defaultdict(lambda: {"real": 0, "synth": 0})
+    for s in samples:
+        key = "synth" if s["signer"].lower().startswith("synth") else "real"
+        per_class[s["label"]][key] += 1
+
+    n_synth = sum(v["synth"] for v in per_class.values())
+    n_real = sum(v["real"] for v in per_class.values())
+    over = [k for k, v in per_class.items() if v["real"] > 0 and v["synth"] > 2 * v["real"]]
+    orphan = [k for k, v in per_class.items() if v["real"] == 0 and v["synth"] > 0]
+
+    return {
+        "n_real": n_real,
+        "n_synthetic": n_synth,
+        "share": round(n_synth / max(1, n_synth + n_real), 3),
+        "over_diluted_classes": sorted(over),
+        "classes_without_real_data": sorted(orphan),
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--min-per-class", type=int, default=100,
@@ -226,14 +247,23 @@ def main() -> int:
     args = parser.parse_args()
 
     samples = load_all()
-    print(f"Memuat {len(samples)} sampel.\n")
+    synth = check_synthetic(samples)
+    real_samples = [s for s in samples if not s["signer"].lower().startswith("synth")]
 
-    dist = check_distribution(samples, args.min_per_class)
-    meta = check_metadata(samples)
-    sanity = check_sanity(samples)
-    dups = check_duplicates(samples, args.near_dup_threshold)
-    outliers = check_outliers(samples, args.outlier_z)
-    confus = check_confusability(samples)
+    summary = f"Memuat {len(samples)} sampel"
+    if synth["n_synthetic"]:
+        summary += f" ({synth['n_real']} nyata + {synth['n_synthetic']} sintetis)"
+    print(summary + ".\n")
+
+    if not real_samples:
+        raise SystemExit("Hanya ada data sintetis — tidak ada yang bisa diaudit. Rekam data nyata dulu.")
+
+    dist = check_distribution(real_samples, args.min_per_class)
+    meta = check_metadata(real_samples)
+    sanity = check_sanity(real_samples)
+    dups = check_duplicates(real_samples, args.near_dup_threshold)
+    outliers = check_outliers(real_samples, args.outlier_z)
+    confus = check_confusability(real_samples)
 
     line = "─" * 62
     print(line)
@@ -285,6 +315,17 @@ def main() -> int:
         print(f"   {p['pair']}: {p['distance']}")
     print("   → Pasangan terdekat adalah prioritas perbaikan: tambah variasi data")
     print("     atau perjelas definisi isyarat di docs/DATA.md.")
+
+    if synth["n_synthetic"]:
+        print(line)
+        print("7. DATA SINTETIS (aturan: hanya untuk train, test wajib nyata)")
+        print(f"   {synth['n_synthetic']} sintetis vs {synth['n_real']} nyata "
+              f"({synth['share'] * 100:.0f}% sintetis)")
+        if synth["over_diluted_classes"]:
+            print(f"   ⚠ Sintetis > 2× nyata di: {', '.join(synth['over_diluted_classes'])}")
+        if synth["classes_without_real_data"]:
+            print(f"   ⚠ Kelas tanpa data nyata: {', '.join(synth['classes_without_real_data'])} "
+                  "— tidak akan pernah teruji")
     print(line)
 
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -299,6 +340,7 @@ def main() -> int:
         "duplicates": dups,
         "outliers": outliers,
         "confusability": confus,
+        "synthetic": synth,
     }, indent=2))
     print(f"Laporan lengkap: {out}")
     return 0
