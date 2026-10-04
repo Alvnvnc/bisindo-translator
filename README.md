@@ -65,6 +65,9 @@ python scripts/train.py             # split default: signer-independent
 # 4. Verifikasi Python ↔ JavaScript menghasilkan angka yang sama
 python scripts/check_parity.py
 
+# 5. (Opsional) Benchmark: baseline vs augmentasi vs sintetis pada split yang sama
+python scripts/benchmark.py
+
 # 5. Jalankan web demo
 python -m http.server 8000
 # buka http://localhost:8000/web/index.html       → demo terjemahan
@@ -91,6 +94,7 @@ python -m http.server 8000
 │   ├── extract_landmarks.py   # gambar/video → CSV landmark (MediaPipe Python)
 │   ├── audit_dataset.py       # audit kualitas data sebelum training
 │   ├── generate_synthetic.py  # data sintetis real-anchored (mixup/pca)
+│   ├── benchmark.py           # bandingkan baseline/augmentasi/sintetis (split sama)
 │   ├── train.py               # latih + evaluasi (split signer-independent) + ekspor model
 │   ├── make_sample_dataset.py # data sintetis mainan untuk smoke test pipeline
 │   ├── check_parity.py        # uji Python ↔ JS (jalankan tiap ubah normalisasi/model)

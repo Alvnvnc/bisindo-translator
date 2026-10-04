@@ -108,9 +108,12 @@ Kredit lengkap komponen open-source dan lisensinya ada di
 Isi setelah training selesai — **pakai angka nyata dari `reports/`**, jangan dikarang:
 
 - Dataset: `[N]` sampel, `[N]` kelas, sumber: `[rekaman sendiri / nama dataset + lisensi]`
-- Akurasi test: `[X]%` (hold-out `[Y]%`)
+- Protokol split: signer-independent (grup uji: `[Sxx]`) — bukan split acak
+- Akurasi test: `[X]%` (hold-out `[Y]%`), macro-F1: `[X]%`
 - Model terpilih: `[KNN k=… / MLP …]` berdasarkan cross-validation
+- Perbandingan konfigurasi (dari `reports/benchmark_*.md`): `[tempel tabelnya]`
 - Kelas paling sering tertukar: `[mis. M ↔ N]` dan langkah perbaikannya
+- Laporan audit data: `[ringkas hasil scripts/audit_dataset.py]`
 
 ---
 

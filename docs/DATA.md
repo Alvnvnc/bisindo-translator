@@ -282,21 +282,23 @@ memakai SMOTE** — kita pakai metode 1–3 di atas.
 ### Cara pakai
 
 ```bash
-# Periksa dulu tanpa menulis file
-python scripts/generate_synthetic.py --dry-run
+# 1. Bandingkan SEMUA konfigurasi sekaligus pada split yang sama —
+#    hasilnya berupa tabel + rekomendasi otomatis (jujur, berbasis angka).
+python scripts/benchmark.py
 
-# Hasilkan (default: mixup + pca, maksimal 2× data nyata per kelas)
-python scripts/generate_synthetic.py
-
-# Latih: sintetis hanya menambah train
+# 2. Latih dengan konfigurasi yang menang (contoh: bila 'sintetis' terbukti unggul)
 python scripts/train.py --include-synthetic
 
-# Bandikan dengan baseline nyata saja (default)
+# Periksa sintetis tanpa menulis file
+python scripts/generate_synthetic.py --dry-run
+
+# Bandingkan manual: baseline vs sintetis
 python scripts/train.py
+python scripts/train.py --include-synthetic
 ```
 
-Cek hasilnya lewat audit — seksi "7. DATA SINTETIS" akan menampilkan porsi &
-peringatan bila sintetis mendominasi.
+Tabel benchmark tersimpan di `reports/benchmark_*.md` — lampirkan di submission
+sebagai bukti proses (sumbangan untuk penilaian Presentasi & Dokumentasi).
 
 ---
 
