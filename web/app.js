@@ -45,15 +45,15 @@ async function loadModel() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     state.model = await res.json();
     const m = state.model.meta || {};
-    modelBadge.textContent = `${m.model?.toUpperCase() || "model"} · ${m.n_classes || 0} kelas · akurasi ${
+    modelBadge.textContent = `${m.model?.toUpperCase() || "model"} · ${m.n_classes || 0} classes · accuracy ${
       m.test_accuracy ? (m.test_accuracy * 100).toFixed(1) + "%" : "–"
     }`;
     modelBadge.classList.remove("badge-error");
   } catch (err) {
     state.model = null;
-    modelBadge.textContent = "model.json belum ada — jalankan scripts/train.py";
+    modelBadge.textContent = "model.json missing — run scripts/train.py";
     modelBadge.classList.add("badge-error");
-    stageHint.textContent = "Model belum dilatih. Rekam data lewat capture.html lalu jalankan scripts/train.py.";
+    stageHint.textContent = "Model not trained yet. Record data in capture.html, then run scripts/train.py.";
     console.error(err);
   }
 }
@@ -85,7 +85,7 @@ function resizeOverlay() {
 
 async function start() {
   startBtn.disabled = true;
-  stageHint.textContent = "Menyiapkan kamera dan model…";
+  stageHint.textContent = "Preparing camera and model…";
 
   try {
     if (!state.landmarker) state.landmarker = await createHandLandmarker();
@@ -94,12 +94,12 @@ async function start() {
     state.running = true;
     state.smoother.reset();
     stopBtn.disabled = false;
-    stageHint.textContent = "Tangan terdeteksi → huruf akan muncul.";
+    stageHint.textContent = "Hand detected → letters will appear.";
     loop();
   } catch (err) {
     console.error(err);
     startBtn.disabled = false;
-    stageHint.textContent = `Gagal memulai: ${err.message}. Periksa izin kamera & koneksi (model MediaPipe dimuat dari CDN).`;
+    stageHint.textContent = `Failed to start: ${err.message}. Check camera permission & connection (MediaPipe loads from a CDN).`;
   }
 }
 
@@ -111,7 +111,7 @@ function stop() {
   startBtn.disabled = false;
   stopBtn.disabled = true;
   letterEl.textContent = "–";
-  letterMeta.textContent = "Kamera dimatikan.";
+  letterMeta.textContent = "Camera stopped.";
   meterFill.style.width = "0%";
 }
 
@@ -128,7 +128,7 @@ function loop() {
     if (landmarks) {
       handleFrame(landmarks);
     } else {
-      letterMeta.textContent = "Tangan tidak terdeteksi — tunjukkan ke kamera.";
+      letterMeta.textContent = "No hand detected — show your hand to the camera.";
       meterFill.style.width = "0%";
     }
   }
@@ -138,7 +138,7 @@ function loop() {
 
 function handleFrame(landmarks) {
   if (!state.model) {
-    letterMeta.textContent = "Model belum dimuat.";
+    letterMeta.textContent = "Model not loaded.";
     return;
   }
 
@@ -148,7 +148,7 @@ function handleFrame(landmarks) {
 
   letterEl.textContent = prediction.label;
   meterFill.style.width = `${Math.round(prediction.confidence * 100)}%`;
-  letterMeta.textContent = `Keyakinan ${(prediction.confidence * 100).toFixed(0)}%`;
+  letterMeta.textContent = `Confidence ${(prediction.confidence * 100).toFixed(0)}%`;
 
   const stable = state.smoother.push(prediction);
   if (stable) {
@@ -166,7 +166,7 @@ stopBtn.addEventListener("click", stop);
 speakBtn.addEventListener("click", () => {
   const text = state.transcript.trim();
   if (!text) {
-    letterMeta.textContent = "Belum ada teks untuk diucapkan.";
+    letterMeta.textContent = "Nothing to speak yet.";
     return;
   }
   speak(text);
@@ -176,10 +176,10 @@ copyBtn.addEventListener("click", async () => {
   if (!state.transcript) return;
   try {
     await navigator.clipboard.writeText(state.transcript);
-    copyBtn.textContent = "Tersalin ✓";
-    setTimeout(() => (copyBtn.textContent = "Salin"), 1200);
+    copyBtn.textContent = "Copied ✓";
+    setTimeout(() => (copyBtn.textContent = "Copy"), 1200);
   } catch {
-    letterMeta.textContent = "Browser menolak akses clipboard.";
+    letterMeta.textContent = "Browser denied clipboard access.";
   }
 });
 

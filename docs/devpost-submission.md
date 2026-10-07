@@ -1,206 +1,215 @@
-# Draft Submission Devpost — Jemari
+# Devpost Submission Draft — Jemari
 
-Template ini mengikuti persis field yang diminta panitia. Isi bagian `[...]`,
-**verifikasi setiap angka dari sumber resmi** sebelum menyalin ke Devpost.
+> Working draft in English (international judging panel). Copy each section
+> into the corresponding Devpost field. Every number below is real and
+> traceable to `reports/` in the repo.
 
 ---
 
 ## Project Title
 
-**Jemari** — dari isyarat jemari, menjadi suara
+**Jemari** — turning finger signs into spoken words
 
-Nama "Jemari" dipilih karena di situlah bahasa isyarat hidup: pada jemari yang
-bergerak. Aplikasi ini membaca gerakan tersebut dan menghadirkan suara —
-real-time, sepenuhnya di perangkat.
+*Jemari* means "fingers" in Bahasa Indonesia — because that is where sign
+language lives. Jemari reads finger-spelled BISINDO (Indonesian Sign Language)
+letters through a webcam and speaks them out loud, entirely on-device.
 
-*(Alternatif bila nama sudah dipakai peserta lain: "TanganBicara", "Sasmita"
-(KBBI: isyarat tubuh))*
+*(Fallback names if another entry uses it: "TanganBicara", "Sasmita")*
 
 ---
 
 ## Inspired by
 
-ML Empowerment Build Challenge 3.0 — kategori bebas (tidak ada tema wajib).
+ML Empowerment Build Challenge 3.0 — open theme (real-world problem / social impact).
 
 ---
 
 ## What it does
 
-Jemari menerjemahkan isyarat tangan Bahasa Isyarat Indonesia menjadi teks dan
-suara secara real-time, langsung di browser. Pengguna cukup menyalakan kamera dan
-memberi isyarat; huruf demi huruf muncul dan bisa langsung diucapkan dengan suara
-bahasa Indonesia agar lawan bicara yang tidak memahami bahasa isyarat tetap bisa
-mengikuti percakapan.
+Jemari translates BISINDO alphabet hand signs into text and speech in real time,
+directly in the browser. A user opens the camera, spells a word letter by letter,
+and each recognized letter appears on screen — then the full word can be spoken
+aloud with a tap (the spoken output is Bahasa Indonesia, because the person at
+the other side of the counter is Indonesian).
 
-Seluruh pemrosesan berjalan di perangkat pengguna — video tidak pernah dikirim ke
-server, sehingga privasi terjaga dan aplikasi tetap ringan untuk perangkat kelas
-menengah.
+Everything runs on the user's device: no server, no account, no API keys, and no
+video ever leaves the device. It also ships with a **dataset recorder**
+(`web/capture.html`): anyone can record new sign samples with per-signer
+metadata, export them, and retrain the model — making the dataset itself a
+community-growable artifact.
 
 ---
 
 ## Problem Statement
 
-Di loket layanan publik (puskesmas, kantor desa, bank, sekolah), komunikasi antara
-pengguna bahasa isyarat dan petugas sering putus karena tidak ada penerjemah
-tersedia. Menulis di kertas memang jadi jalan keluar, tetapi lambat, menyulitkan
-kedua pihak, dan tidak setara.
+At public service counters in Indonesia — community health clinics, village
+offices, banks, schools — Deaf signers and hearing staff rarely share a language.
+Certified sign language interpreters are scarce and almost never available on
+demand, especially outside big cities. The fallback (writing on paper) is slow,
+exhausting, and unequal: explaining a symptom or processing a document becomes
+an ordeal.
 
-Juru bahasa isyarat bersertifikat jumlahnya terbatas dan tidak selalu tersedia saat
-dibutuhkan, terutama di daerah. `[VERIFIKASI & SITIR: jumlah populasi Tuli di
-Indonesia dan rasio ketersediaan juru bahasa isyarat — cari sumber resmi, mis.
-data Kementerian Sosial / Gerkatin / WHO, lalu tulis angkanya di sini.]`
+Something as simple as fingerspelling a name or a basic need at a counter
+should not require another person to be present.
 
-Akibatnya, kebutuhan sederhana seperti menjelaskan gejala ke dokter atau mengurus
-dokumen menjadi pengalaman yang melelahkan dan bergantung pada orang lain.
+> `[Add a verified statistic here: number of Deaf sign language users in
+> Indonesia and interpreter availability — cite an official source such as
+> Kemensos / Gerkatin / WHO before submitting.]`
 
 ---
 
 ## Solution Overview
 
-Jemari mengubah kamera ponsel atau laptop menjadi penerjemah isyarat yang
-selalu tersedia, tanpa aplikasi khusus dan tanpa biaya langganan:
+Jemari turns any phone or laptop camera into an always-available fingerspelling
+bridge:
 
-1. **Deteksi tangan** — MediaPipe Hand Landmarker mengekstrak 21 titik kunci tangan
-   per frame, berjalan di WebAssembly sehingga tidak butuh GPU khusus.
-2. **Normalisasi** — landmark digeser ke titik pergelangan dan diskalakan terhadap
-   ukuran tangan, sehingga model tidak bergantung pada posisi tangan di frame
-   maupun perbedaan ukuran tangan (anak-anak vs dewasa).
-3. **Klasifikasi** — vektor 63 dimensi dimasukkan ke classifier yang **kami latih
-   sendiri** (KNN / MLP kecil), lalu hasil beberapa frame dirata-ratakan secara
-   temporal agar teks tidak berkedip antar huruf.
-4. **Output dua arah** — teks ditampilkan besar dan dapat diucapkan lewat Web
-   Speech API dalam bahasa Indonesia.
+1. **Hand detection** — MediaPipe Hand Landmarker extracts 21 3D keypoints per
+   frame, running in-browser via WebAssembly/WebGL (CPU fallback included).
+2. **Normalization** — keypoints are translated to the wrist and scaled by hand
+   size, making the features invariant to hand position in frame and to hand
+   size (children vs adults).
+3. **Classification** — the resulting 63-dimensional vector feeds a small MLP
+   that **we trained ourselves** (not a third-party API). Predictions are
+   smoothed over a temporal window with a confidence threshold so letters don't
+   flicker.
+4. **Two-way output** — recognized letters build a transcript that can be spoken
+   aloud via the Web Speech API.
 
-Karena seluruh pipeline berjalan di klien, aplikasi bisa dipakai di ruang tunggu
-dengan koneksi terbatas tanpa mengirim data pribadi siapa pun.
+Because the whole pipeline is client-side, it works in a waiting room with poor
+connectivity and sends no personal data anywhere.
 
 ---
 
 ## Key Features
 
-- **Terjemahan isyarat real-time** dari webcam, tanpa instalasi
-- **Suara bahasa Indonesia** (Web Speech API) agar lawan bicara langsung paham
-- **Transkrip kalimat** yang bisa disalin atau dibersihkan
-- **Indikator keyakinan** per huruf — pengguna tahu kapan sistem ragu
-- **100% on-device** — video tidak pernah meninggalkan perangkat
-- **Mode Latih** — siapa pun bisa menambah sampel isyaratnya sendiri lewat
-  `capture.html`, lalu melatih ulang model
-- **Smoothing temporal** — voting beberapa frame + ambang keyakinan untuk hasil stabil
+- **Real-time sign-to-text** from the webcam, zero installation
+- **Indonesian voice output** (Web Speech API, `id-ID`) so counter staff understand
+- **Sentence transcript** with copy and clear actions
+- **Per-letter confidence indicator** — users can see when the system is unsure
+- **100% on-device** — video never leaves the device; no server, no API keys
+- **Dataset recorder with signer metadata** — grow the dataset as a community,
+  with honest signer-independent evaluation built in
+- **Temporal smoothing** — multi-frame voting + confidence thresholding
 
 ---
 
 ## Technologies Used
 
-| Teknologi | Peran |
+| Technology | Role |
 |---|---|
-| MediaPipe Tasks Vision (Hand Landmarker) | Deteksi 21 landmark tangan di browser (WASM/WebGL) |
-| JavaScript (ES modules, Canvas API) | Runtime inference, UI, visualisasi landmark |
-| Web Speech API | Text-to-speech bahasa Indonesia |
-| Python 3.12 + scikit-learn | Training & evaluasi classifier (KNN, MLP, RandomForest) |
-| NumPy / OpenCV | Praproses data, ekstraksi landmark dari dataset gambar |
-| localStorage | Penyimpanan dataset rekaman di sisi klien |
-| GitHub Actions / Pages | `[opsional]` hosting live demo (HTTPS agar kamera diizinkan browser) |
+| MediaPipe Tasks Vision (Hand Landmarker) | 21 hand keypoints in-browser (WASM/WebGL) |
+| JavaScript (ES modules, Canvas API) | Runtime inference, UI, landmark overlay |
+| Web Speech API | Indonesian text-to-speech output |
+| Python 3.12 + scikit-learn | Training & evaluation (KNN, MLP, RandomForest) |
+| NumPy / OpenCV | Data preprocessing, landmark extraction from images |
+| localStorage | Client-side dataset storage in the recorder |
+| GitHub Pages | Static hosting (HTTPS, required for camera access) |
 
-Kredit lengkap komponen open-source dan lisensinya ada di
-[`ATTRIBUTIONS.md`](../ATTRIBUTIONS.md).
+Credits for open-source components and datasets (with licenses): `ATTRIBUTIONS.md`.
 
 ---
 
-## Model & Evaluasi
+## Model & Evaluation
 
-**Data** — 510 sampel landmark, 26 kelas huruf BISINDO. Sumber: dataset publik
-"BISINDO Hand-Sign Detection" (rhiosutoyo, **MIT License**; dipakai pada paper
-IEEE ICRAIE 2023), diekstraksi dengan MediaPipe Hand Landmarker — 510 dari 520
-gambar terdeteksi tangannya (98%). Ditambah 880 sampel sintetis real-anchored
-(mixup + PCA dari data nyata) untuk **training saja**; test selalu 100% data nyata.
+**Data** — 510 landmark samples, 26 BISINDO letter classes. Source: the public
+"BISINDO Hand-Sign Detection" dataset (rhiosutoyo, **MIT License**; used in an
+IEEE ICRAIE 2023 paper), extracted with MediaPipe Hand Landmarker — hands were
+detected in 510 of 520 images (98%). Plus 880 real-anchored synthetic samples
+(in-class mixup + per-class PCA sampling) used for **training only**; the test
+set is always 100% real data.
 
-**Model** — MLP (128–64 unit) di atas StandardScaler; seluruh inference berjalan
-di sisi klien: landmark via MediaPipe WASM, classifier via JavaScript murni.
+**Model** — MLP (128–64) over a StandardScaler; all inference client-side
+(MediaPipe WASM for landmarks, plain JavaScript for the classifier).
 
-**Hasil** — akurasi **92,2%** pada hold-out 20% (macro-F1 90,3%). Verifikasi
-menyeluruh pada 510 foto gesture lewat jalur inference browser: **93,9%**.
+**Results** — **92.2%** accuracy on a 20% hold-out (macro-F1 90.3%).
+Full sweep of all 510 gesture images through the *browser inference path*
+(the exact code that runs in the live demo): **93.9%**.
 
-**Per huruf (verifikasi 510 gambar):** 21 huruf ≥ 95%; terlemah: B 65%, H 74%,
-K 80%, M 80%. Kekeliruan yang tersisa — B→E, K→P, M→N, H→D — adalah bentuk
-tangan yang memang serupa dalam BISINDO, bukan kegagalan acak.
+**Per letter (510-image verification):** 21 of 26 letters ≥ 95%; weakest:
+B 65%, H 74%, K 80%, M 80%. The remaining errors — B→E, K→P, M→N, H→D — are
+genuinely near-identical handshapes in BISINDO, not random failures.
 
-**Perbandingan konfigurasi** (benchmark terkontrol, split identik untuk semua):
+**Configuration comparison** (controlled benchmark, identical split for every
+configuration):
 
-| Konfigurasi | Model | Akurasi | Δ vs baseline | Ukuran model |
+| Configuration | Model | Accuracy | Δ vs baseline | Model size |
 |---|---|---:|---:|---:|
-| baseline | KNN | 84,3% | — | 568 KB |
-| baseline | MLP | 84,3% | — | 340 KB |
-| augmentasi 3× | MLP | 89,2% | +4,9 poin | 366 KB |
-| **sintetis** | **MLP** | **92,2%** | **+7,9 poin** | **366 KB** |
+| baseline | KNN | 84.3% | — | 568 KB |
+| baseline | MLP | 84.3% | — | 340 KB |
+| augmentation 3× | MLP | 89.2% | +4.9 pts | 366 KB |
+| **synthetic** | **MLP** | **92.2%** | **+7.9 pts** | **366 KB** |
 
-**Audit data otomatis**: distribusi seimbang (rasio 1,33×), 1 duplikat & 1 outlier
-terdeteksi dan ditangani, pasangan centroid terdekat konsisten dengan pola
-kekeliruan model.
+**Automated data audit**: balanced classes (1.33× ratio), 1 duplicate and 1
+outlier detected and handled; the closest class centroids match the model's
+actual confusion pairs.
 
-**Keterbatasan yang diakui** — dataset publik hanya mencakup 1 periset, sehingga
-angka di atas memakai split acak (bukan signer-independent). Evaluasi
-antar-periset adalah langkah validasi berikutnya; infrastrukturnya sudah siap
-(metadata periset + `StratifiedGroupKFold` di `scripts/train.py`).
+**Acknowledged limitation** — the public dataset covers a single signer, so the
+numbers above use a random split rather than a signer-independent one.
+Signer-independent evaluation is the immediate next validation step; the
+infrastructure is already built (per-signer metadata + `StratifiedGroupKFold` in
+`scripts/train.py`, plus a controlled benchmark harness).
 
 ---
 
 ## Target Users
 
-1. **Pengguna bahasa isyarat (BISINDO/SIBI)** — terutama yang sering berurusan dengan
-   layanan publik tanpa pendamping.
-2. **Petugas layanan publik** — puskesmas, kantor desa, bank, sekolah, yang perlu
-   berkomunikasi tanpa juru bahasa isyarat.
-3. **Keluarga & relawan** — yang ingin berkomunikasi atau belajar isyarat dasar
-   lewat Mode Latih.
+1. **Deaf BISINDO signers** — especially those who deal with public services
+   without an interpreter.
+2. **Public service staff** — clinic officers, village administrators, bank
+   tellers, teachers — who need to communicate without knowing sign language.
+3. **Families & volunteers** — learning basic signs via the built-in recorder
+   and reference images.
 
 ---
 
-## Social Impact Statement (opsional tapi dianjurkan)
+## Social Impact Statement (optional but encouraged)
 
-`[Tulis 3–4 kalimat: masalah kesenjangan akses layanan, siapa yang terbantu, dan
-bagaimana proyek ini bisa dipakai gratis tanpa biaya infrastruktur. Sertakan angka
-yang sudah diverifikasi + sumbernya.]`
+`[Write 3–4 sentences: the access gap at public counters in Indonesia, who is
+helped, and why a free, offline-capable, privacy-preserving tool matters.
+Include only verified statistics with sources.]`
 
 ---
 
-## Project Files (wajib minimal 1)
+## Project Files (at least 1 required)
 
-- **Video demo 2–3 menit** — struktur:
-  1. 0:00–0:15 — masalah (satu kalimat + tunjukkan situasi loket)
-  2. 0:15–0:45 — demo langsung: isyarat → huruf → kalimat → suara
-  3. 0:45–1:30 — cara kerja (landmark overlay, pipeline on-device)
-  4. 1:30–2:15 — Mode Latih + hasil evaluasi model (tampilkan angka akurasi)
-  5. 2:15–2:45 — dampak & langkah berikutnya
-- **Screenshot 3–5 layar:** demo utama, overlay landmark, Mode Latih/capture,
-  tabel dataset, laporan metrik
-- Rekam video dengan resolusi ≥ 720p, tangan terlihat jelas, dan **tampilkan teks
-  hasil terjemahan** di layar (juri mungkin menonton tanpa suara)
+- **Demo video, 2–3 minutes** — structure:
+  1. 0:00–0:15 — the problem (one sentence + a counter scenario)
+  2. 0:15–0:45 — live demo: sign → letters → word → spoken output
+  3. 0:45–1:30 — how it works (landmark overlay, on-device pipeline)
+  4. 1:30–2:15 — dataset recorder + model evaluation numbers (show real metrics)
+  5. 2:15–2:45 — impact & next steps
+- **3–5 screenshots:** main demo, landmark overlay, recorder with reference
+  images, dataset table, metrics report
+- Record at ≥720p, keep hands clearly visible, and **show the transcript on
+  screen** (judges may watch without sound)
 
 ## Project Link / Repository
 
-- **Live demo:** https://alvnvnc.github.io/bisindo-translator/ (HTTPS — kamera & TTS berfungsi; uji di laptop maupun HP)
-- **Repo GitHub (public):** https://github.com/Alvnvnc/bisindo-translator
-- `model.json` (hasil training) & data landmark ikut ter-deploy — demo berjalan penuh tanpa backend
+- **Live demo:** https://alvnvnc.github.io/bisindo-translator/ (HTTPS — camera &
+  TTS work; try it on laptop or phone)
+- **GitHub repo (public):** https://github.com/Alvnvnc/bisindo-translator
+- The trained `model.json` and landmark dataset ship with the site — the demo
+  runs fully with no backend
 
 ## Team Details
 
-| Nama | Peran |
+| Name | Role |
 |---|---|
-| `[…]` | `[mis. ML — dataset, training, evaluasi]` |
-| `[…]` | `[mis. Frontend — UI, integrasi MediaPipe]` |
-| `[…]` | `[mis. Riset pengguna, dokumentasi, video]` |
+| `[…]` | `[e.g. ML — dataset, training, evaluation]` |
+| `[…]` | `[e.g. Frontend — UI, MediaPipe integration]` |
+| `[…]` | `[e.g. User research, documentation, video]` |
 
-*(Solo juga diperbolehkan — cukup satu baris.)*
+*(Solo submissions are allowed — one row is enough.)*
 
 ---
 
-## Checklist sebelum submit
+## Pre-submit checklist
 
-- [ ] Semua field di atas terisi, tidak ada `[placeholder]` tersisa
-- [ ] Setiap angka punya sumber yang bisa diverifikasi
-- [ ] Video & screenshot terunggah dan bisa diputar
-- [ ] Link repo aktif dan public (bukan private)
-- [ ] Live demo bisa dibuka di HP orang lain (HTTPS, kamera jalan)
-- [ ] `ATTRIBUTIONS.md` mencantumkan semua komponen pihak ketiga
-- [ ] Anggota tim terdaftar di submission
-- [ ] Submit jauh sebelum deadline (9 Okt 11:45pm PDT)
+- [ ] Every field filled; no `[placeholders]` left
+- [ ] Every statistic has a verifiable source
+- [ ] Video & screenshots uploaded and playable
+- [ ] Repo link works and is public
+- [ ] Live demo opens on someone else's phone (HTTPS, camera works)
+- [ ] `ATTRIBUTIONS.md` lists all third-party components
+- [ ] Team members added to the submission
+- [ ] Submit well before the deadline (Oct 9, 11:45pm PDT)

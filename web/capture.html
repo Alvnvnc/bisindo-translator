@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="id">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Jemari — Rekam Dataset</title>
+    <title>Jemari — Dataset Recorder</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -11,15 +11,15 @@
       <div class="brand">
         <span class="brand-mark" aria-hidden="true">🎥</span>
         <div>
-          <h1>Rekam Dataset</h1>
-          <p class="brand-sub">Kumpulkan sampel landmark tangan untuk training</p>
+          <h1>Dataset Recorder</h1>
+          <p class="brand-sub">Collect hand-sign landmark samples for training</p>
         </div>
       </div>
       <a class="btn btn-small" href="index.html">← Demo</a>
     </header>
 
     <main class="layout capture-grid">
-      <!-- Kiri: kamera + rekam -->
+      <!-- Left: camera + record -->
       <section class="card">
         <div class="mirror" id="mirror">
           <video id="video" playsinline muted></video>
@@ -27,99 +27,100 @@
         </div>
 
         <div class="row" style="margin-top: 14px">
-          <button id="startBtn" class="btn btn-primary">Mulai kamera</button>
-          <button id="stopBtn" class="btn" disabled>Berhenti</button>
+          <button id="startBtn" class="btn btn-primary">Start camera</button>
+          <button id="stopBtn" class="btn" disabled>Stop</button>
         </div>
-        <p class="status" id="camStatus">Kamera belum aktif.</p>
+        <p class="status" id="camStatus">Camera is off.</p>
 
         <div class="notice" style="margin-top: 14px">
-          Saat merekam, <strong>gerakkan tangan perlahan</strong> (geser posisi, ubah jarak,
-          putar sedikit) supaya model tidak hafal satu pose saja. Variasi pencahayaan dan
-          latar juga membantu.
+          While recording, <strong>move your hand slowly</strong> (shift position,
+          change distance, rotate slightly) so the model doesn't memorize a single
+          pose. Varying lighting and backgrounds helps too.
         </div>
       </section>
 
-      <!-- Kanan: perekaman + daftar kelas -->
+      <!-- Right: recording + class table -->
       <section class="card">
         <div class="row">
           <div class="field" style="flex: 1">
-            <label for="classInput">Kelas (label isyarat)</label>
+            <label for="classInput">Class (sign label)</label>
             <input
               id="classInput"
               type="text"
               list="classList"
-              placeholder="mis. A"
+              placeholder="e.g. A"
               autocomplete="off"
               maxlength="24"
             />
             <datalist id="classList"></datalist>
           </div>
           <div class="field">
-            <label for="signerInput">ID periset</label>
-            <input id="signerInput" type="text" placeholder="mis. S01" maxlength="16" style="width: 110px" />
+            <label for="signerInput">Signer ID</label>
+            <input id="signerInput" type="text" placeholder="e.g. S01" maxlength="16" style="width: 110px" />
           </div>
           <div class="field">
-            <label for="frameCount">Jumlah frame</label>
+            <label for="frameCount">Frames</label>
             <input id="frameCount" type="number" value="12" min="3" max="60" style="width: 92px" />
           </div>
         </div>
 
         <div class="row" style="margin-top: 14px">
-          <button id="recordBtn" class="btn btn-primary" disabled>● Rekam</button>
-          <span class="hint" id="recordHint">Aktifkan kamera dulu.</span>
+          <button id="recordBtn" class="btn btn-primary" disabled>● Record</button>
+          <span class="hint" id="recordHint">Start the camera first.</span>
         </div>
         <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
         <p class="status" id="recordStatus"></p>
 
         <div class="ref-pred-row">
           <div class="ref-box">
-            <div class="ref-label">Referensi huruf <strong id="refClass">–</strong>
-              <span class="hint">(tiru bentuk tangannya)</span></div>
+            <div class="ref-label">Reference for <strong id="refClass">–</strong>
+              <span class="hint">(copy this handshape)</span></div>
             <div class="ref-images" id="refImages"></div>
           </div>
           <div class="pred-box">
-            <div class="ref-label">Model menyangka</div>
+            <div class="ref-label">Model thinks</div>
             <div class="pred-letter" id="predLetter">–</div>
-            <div class="letter-meta" id="predMeta">tunjukkan tangan ke kamera</div>
-            <div class="hint">panduan, bukan kebenaran — model bisa keliru</div>
+            <div class="letter-meta" id="predMeta">show your hand to the camera</div>
+            <div class="hint">a guide, not the truth — the model can be wrong</div>
           </div>
         </div>
 
         <h2 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
                    color: var(--text-dim); margin: 22px 0 8px">
-          Dataset tersimpan di browser
+          Dataset stored in this browser
         </h2>
         <table class="classes">
           <thead>
-            <tr><th>Kelas</th><th style="text-align: right">Sampel</th><th style="text-align: right">Aksi</th></tr>
+            <tr><th>Class</th><th style="text-align: right">Samples</th><th style="text-align: right">Action</th></tr>
           </thead>
           <tbody id="classRows"></tbody>
         </table>
         <p class="status" id="totalStatus"></p>
 
         <div class="row" style="margin-top: 16px">
-          <button id="exportBtn" class="btn">⬇ Ekspor CSV</button>
+          <button id="exportBtn" class="btn">⬇ Export CSV</button>
           <label class="btn" style="cursor: pointer">
-            ⬆ Impor CSV
+            ⬆ Import CSV
             <input id="importInput" type="file" accept=".csv" hidden />
           </label>
-          <button id="clearBtn" class="btn btn-danger">Hapus semua</button>
+          <button id="clearBtn" class="btn btn-danger">Delete all</button>
         </div>
 
-        <div class="notice" style="margin-top: 14px">
-          Setiap rekaman diberi <strong>ID sesi otomatis</strong> dan <strong>ID periset</strong>.
-          Ini penting untuk teori data: model harus diuji pada periset yang belum pernah
-          dilihat sistem (<em>signer-independent</em>), kalau tidak akurasinya palsu.
-          Setelah cukup data (target <strong>≥ 300 sampel/kelas dari ≥ 3 periset</strong>),
-          ekspor CSV lalu simpan ke <code>data/samples/</code> dan jalankan
+        <div class="notice" style="margin-top: 16px">
+          Every recording gets an <strong>automatic session ID</strong> and a
+          <strong>signer ID</strong>. This matters for correct methodology: the model
+          must be evaluated on signers it has never seen (<em>signer-independent</em>),
+          otherwise accuracy numbers are misleading. Once you have enough data
+          (target <strong>≥ 300 samples/class from ≥ 3 signers</strong>), export the
+          CSV into <code>data/samples/</code> and run
           <code>python scripts/train.py</code>.
         </div>
       </section>
     </main>
 
     <footer class="footer">
-      <span>Jemari · alat perekaman dataset</span>
-      <span>Landmark diekstrak on-device, hanya vektor 63-dimensi yang disimpan</span>
+      <span>Jemari · dataset recording tool</span>
+      <span>Landmarks extracted on-device; only 63-dimensional vectors are stored</span>
     </footer>
 
     <script type="module" src="capture.js"></script>

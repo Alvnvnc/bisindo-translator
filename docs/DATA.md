@@ -1,5 +1,10 @@
 # Panduan Persiapan Data — Jemari
 
+> **Note (EN):** this is the team's internal working document, written in
+> Bahasa Indonesia. The English-facing materials are `README.md`, the web UI,
+> and `docs/devpost-submission.md`. CLI tooling output is also Bahasa Indonesia
+> (team-facing); see README §Data format for the English summary.
+
 > **Prinsip:** model bagus tidak menyelamatkan data buruk. Di project ini, kelas
 > landmark sangat kecil (63 dimensi), jadi kualitas & keberagaman data jauh lebih
 > menentukan daripada arsitektur model. Kerjakan dokumen ini dulu, baru training.

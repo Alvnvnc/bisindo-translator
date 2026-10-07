@@ -1,182 +1,188 @@
 # Jemari
 
-**Dari isyarat jemari, menjadi suara.**
+**From fingertip signs to spoken words.**
 
-🔗 **Demo live: https://alvnvnc.github.io/bisindo-translator/**
+🔗 **Live demo: https://alvnvnc.github.io/bisindo-translator/**
 
-*Jemari* — penerjemah alfabet BISINDO menjadi teks dan suara secara real-time,
-sepenuhnya di perangkat. Dibangun untuk jembatan komunikasi di layanan publik:
-nama ini memilih sudut pandang yang paling manusiawi, karena komunikasi justru
-hidup di jemari tangan.
+*Jemari* ("fingers" in Bahasa Indonesia) is a real-time BISINDO (Indonesian
+Sign Language) alphabet translator that turns webcam hand signs into text and
+speech — running entirely on the user's device. Built as a communication bridge
+at public service counters (clinics, village offices, banks, schools), for
+ML Empowerment Build Challenge 3.0.
 
-Aplikasi web yang menerjemahkan isyarat tangan menjadi teks dan suara secara *real-time*
-langsung di browser — tanpa server, tanpa kamera cloud, dan tetap berfungsi untuk
-pengguna dengan koneksi terbatas. Ditujukan untuk interaksi di loket layanan publik
-(puskesmas, kantor desa, bank) antara pengguna BISINDO dan petugas yang tidak
-menguasai bahasa isyarat, plus mode latihan untuk orang yang baru belajar.
+- **Submission deadline:** October 9, 2026, 11:45pm PDT
+- **Challenge:** [ML Empowerment Build Challenge 3.0](https://ml-build-challenge-3.devpost.com/)
 
-- **Deadline submission:** 9 Oktober 2026, 11:45pm PDT (≈ 10 Okt 13:45 WIB)
-- **Kompetisi:** [ML Empowerment Build Challenge 3.0](https://ml-build-challenge-3.devpost.com/)
+> The spoken output is deliberately **Bahasa Indonesia** (`id-ID`): the person
+> listening at the counter is Indonesian. The interface is in English for the
+> international demo.
 
 ---
 
-## Arsitektur
+## Architecture
 
 ```
-Kamera browser
+Browser camera
       │
       ▼
-MediaPipe Hand Landmarker (WebAssembly, jalan di device)
-      │  21 titik landmark per tangan (x, y, z)
+MediaPipe Hand Landmarker (WebAssembly, on-device)
+      │  21 keypoints per hand (x, y, z)
       ▼
-Normalisasi (translasi ke pergelangan + skala ukuran tangan)
-      │  vektor fitur 63 dimensi
+Normalization (translate to wrist + scale by hand size)
+      │  63-dimensional feature vector
       ▼
-Classifier hasil training (KNN / MLP kecil) ── dimuat dari web/model.json
+Self-trained classifier (KNN / small MLP) ── loaded from web/model.json
       │
       ▼
-Smoothing (voting N frame + ambang confidence)
+Temporal smoothing (N-frame voting + confidence threshold)
       │
       ▼
-Teks di layar  +  suara (Web Speech API, id-ID)
+On-screen text  +  speech (Web Speech API, id-ID)
 ```
 
-Seluruh inference berjalan **di sisi klien**. Data kamera tidak pernah meninggalkan
-perangkat pengguna — ini bagian dari nilai jual proyek (privasi by design).
+All inference runs **client-side**. Camera frames never leave the user's
+device — privacy by design is part of the product's value.
 
-Alur kerja pengembangan:
+Development workflow:
 
-1. **Kumpulkan data** — `web/capture.html` (rekam sampel landmark sendiri lewat webcam),
-   atau `scripts/extract_landmarks.py` (konversi dataset gambar ke format yang sama).
-2. **Latih model** — `scripts/train.py` → evaluasi + ekspor `web/model.json`.
-3. **Jalankan demo** — buka `web/index.html`.
+1. **Collect data** — `web/capture.html` (record landmark samples with per-signer
+   metadata), or `scripts/extract_landmarks.py` (convert an image dataset to the
+   same format).
+2. **Train** — `scripts/train.py` → evaluation + export to `web/model.json`.
+3. **Run the demo** — open `web/index.html`.
 
 ---
 
 ## Setup
 
-Prasyarat: Python 3.12 (via `uv`), Node.js hanya untuk local server opsional.
+Requires Python 3.12 (via `uv`); Node.js is only needed for the optional
+local parity test.
 
 ```bash
-# 1. Buat virtual environment Python 3.12
+# 1. Create a Python 3.12 virtual environment
 uv venv --python 3.12 .venv
 source .venv/bin/activate
 
-# 2. Install dependency
+# 2. Install dependencies
 uv pip install -r requirements.txt
 
-# 3. Uji pipeline dengan data sintetis (sekali saja, untuk memastikan alurnya jalan)
+# 3. One-time pipeline smoke test with synthetic data
 python scripts/make_sample_dataset.py
-python scripts/audit_dataset.py     # checklist kualitas data
-python scripts/train.py             # split default: signer-independent
-# 4. Verifikasi Python ↔ JavaScript menghasilkan angka yang sama
+python scripts/audit_dataset.py     # data quality checklist
+python scripts/train.py             # default split: signer-independent
+
+# 4. Verify Python ↔ JavaScript produce identical numbers
 python scripts/check_parity.py
 
-# 5. (Opsional) Benchmark: baseline vs augmentasi vs sintetis pada split yang sama
+# 5. (Optional) Controlled benchmark: baseline vs augmentation vs synthetic
 python scripts/benchmark.py
 
-# 5. Jalankan web demo
+# 6. Run the web demo
 python -m http.server 8000
-# buka http://localhost:8000/web/index.html       → demo terjemahan
-# buka http://localhost:8000/web/capture.html     → rekam dataset sendiri
+# open http://localhost:8000/web/index.html       → translation demo
+# open http://localhost:8000/web/capture.html     → dataset recorder
 ```
 
-> Catatan: `http.server` diperlukan karena MediaPipe Tasks Vision memuat model lewat
-> fetch, yang diblokir pada protokol `file://`. Untuk demo publik, deploy ke
-> GitHub Pages / Vercel / Netlify (wajib HTTPS agar kamera diizinkan browser).
+> `http.server` is required because MediaPipe Tasks Vision fetches its model
+> over HTTP, which `file://` blocks. For the public demo, we deploy to GitHub
+> Pages (HTTPS is required for camera access).
 
 ---
 
-## Struktur repo
+## Repository structure
 
 ```
 ├── README.md
-├── ATTRIBUTIONS.md            # kredit repo/dataset pihak ketiga + lisensi
+├── ATTRIBUTIONS.md            # third-party credits + licenses
+├── SECURITY.md                # security & privacy posture
 ├── LICENSE                    # MIT
 ├── requirements.txt
+├── index.html                 # landing page (production)
 ├── data/
-│   ├── raw/                   # gambar/video mentah per kelas (opsional)
-│   └── samples/               # CSV landmark: class,f0..f62  ← input training
+│   ├── raw/                   # raw images per class (gitignored)
+│   └── samples/               # landmark CSVs: class,f0..f62,session,signer
 ├── scripts/
-│   ├── extract_landmarks.py   # gambar/video → CSV landmark (MediaPipe Python)
-│   ├── audit_dataset.py       # audit kualitas data sebelum training
-│   ├── generate_synthetic.py  # data sintetis real-anchored (mixup/pca)
-│   ├── benchmark.py           # bandingkan baseline/augmentasi/sintetis (split sama)
-│   ├── train.py               # latih + evaluasi (split signer-independent) + ekspor model
-│   ├── make_sample_dataset.py # data sintetis mainan untuk smoke test pipeline
-│   ├── check_parity.py        # uji Python ↔ JS (jalankan tiap ubah normalisasi/model)
+│   ├── extract_landmarks.py   # images/video → landmark CSV (MediaPipe)
+│   ├── audit_dataset.py       # data quality audit before training
+│   ├── generate_synthetic.py  # real-anchored synthetic data (mixup/pca)
+│   ├── benchmark.py           # controlled config comparison (same split)
+│   ├── train.py               # train + evaluate (SI split) + export model
+│   ├── make_sample_dataset.py # synthetic toy data for pipeline smoke tests
+│   ├── check_parity.py        # Python ↔ JS parity guard
 │   └── check_parity.mjs
 ├── web/
-│   ├── index.html             # demo utama: terjemah real-time
-│   ├── app.js                 # wiring kamera → klasifikasi → UI + TTS
-│   ├── capture.html           # alat rekam dataset lewat webcam
+│   ├── index.html             # main demo: real-time translation
+│   ├── app.js                 # camera → classification → UI + TTS wiring
+│   ├── capture.html           # webcam dataset recorder
 │   ├── capture.js
-│   ├── landmarks.js           # normalisasi + inference (inti matematika)
-│   ├── hands.js               # wrapper MediaPipe Tasks Vision
-│   ├── model.json             # hasil training (ikut di-commit agar demo bisa di-deploy)
+│   ├── landmarks.js           # normalization + inference (the math core)
+│   ├── hands.js               # MediaPipe Tasks Vision wrapper
+│   ├── ref/                   # reference thumbnails per letter + manifest
+│   ├── model.json             # trained model (committed so the demo deploys)
 │   └── style.css
-├── reports/                   # metrik training & laporan audit data (tidak masuk git)
+├── reports/                   # training metrics & audits (gitignored)
 └── docs/
-    ├── DATA.md                # panduan persiapan data: sumber, protokol, etika, QC
-    ├── PLAN.md                # sprint 5 hari + aturan de-risking
-    └── devpost-submission.md  # template submission Devpost
+    ├── DATA.md                # data preparation guide (in Bahasa Indonesia)
+    ├── PLAN.md                # 5-day sprint plan + de-risking rules (id)
+    └── devpost-submission.md  # English submission draft
 ```
 
 ---
 
-## Format data
+## Data format
 
-Semua sumber data bermuara ke satu format CSV di `data/samples/`:
+All data sources converge on one CSV format in `data/samples/`:
 
 ```
 class,f0,f1,...,f62,session,signer
 A,0.123,-0.456,...,ses-20261005-1200-abc,S01
 ```
 
-- `class` — label isyarat (mis. huruf alfabet `A`–`Z`)
-- `f0..f62` — 21 landmark × 3 koordinat (x, y, z), **sudah dinormalisasi**
-- `session` — ID sesi rekaman (satu kali tekan "Rekam"); kolom opsional
-- `signer` — ID periset; **wajib untuk evaluasi yang jujur** (split signer-independent)
+- `class` — sign label (e.g. letters `A`–`Z`)
+- `f0..f62` — 21 keypoints × 3 coordinates (x, y, z), **already normalized**
+- `session` — recording session id (one press of "Record"); optional column
+- `signer` — signer id; **required for honest signer-independent evaluation**
 
-Kolom `session`/`signer` dibaca berdasarkan nama header, jadi CSV lama tanpa
-keduanya tetap bisa dipakai. Aturan lengkap persiapan data (cara mencari dataset,
-protokol merekam, konvensi labeling, etika) ada di **[`docs/DATA.md`](docs/DATA.md)**.
+`session`/`signer` are read by header name, so legacy CSVs without them still
+work. The full data-preparation methodology (where to find datasets, recording
+protocol, labeling conventions, ethics) is in
+[`docs/DATA.md`](docs/DATA.md) *(in Bahasa Indonesia)*.
 
-Normalisasi (wajib identik antara Python dan JS — lihat `scripts/train.py` dan
-`web/app.js`):
+Normalization (must stay identical between Python and JS — see
+`scripts/train.py` and `web/app.js`):
 
-1. Geser semua titik sehingga pergelangan tangan (landmark 0) berada di origin.
-2. Bagi dengan jarak terjauh dari pergelangan ke landmark mana pun (scale-invariant).
-3. Ratakan menjadi vektor 63 dimensi.
+1. Translate all points so the wrist (keypoint 0) is at the origin.
+2. Divide by the farthest wrist-to-keypoint distance (scale invariance).
+3. Flatten into a 63-dimensional vector.
 
-Ini membuat model tidak bergantung pada posisi tangan di frame maupun ukuran tangan
-pengguna (anak-anak vs dewasa).
+This makes the model independent of hand position in frame and of hand size.
 
 ---
 
 ## Status
 
-- [x] Scaffold pipeline: landmark → training → ekspor → inference di browser
-- [x] Alat rekam dataset (`web/capture.html`) + metadata periset/sesi + ekspor/impor CSV
-- [x] Audit kualitas data otomatis (`scripts/audit_dataset.py`)
-- [x] Data sintetis real-anchored (`scripts/generate_synthetic.py`) — hanya untuk train
-- [x] Split signer-independent & augmentasi sesuai teori (`scripts/train.py`)
-- [x] Benchmark terkontrol (`scripts/benchmark.py`)
-- [x] Uji paritas Python ↔ JavaScript (`scripts/check_parity.py`) — lulus
-- [x] Demo UI dasar: huruf besar, indikator keyakinan, transkrip, TTS `id-ID`
-- [x] **Dataset nyata: 510 landmark dari dataset BISINDO publik (MIT, paper IEEE 2023)**
-- [x] **Model v1: MLP 26 huruf, 92,2% (split acak, 1 periset — menunggu split SI)**
-- [ ] Rekaman periset baru (S01/S02) → evaluasi signer-independent yang jujur
-- [ ] Uji dengan pengguna asli + video demo
-- [ ] Mode latihan & frasa layanan (stretch)
-- [ ] Deploy live demo + submission Devpost
+- [x] Pipeline scaffold: landmarks → training → export → browser inference
+- [x] Dataset recorder (`web/capture.html`) with signer/session metadata
+- [x] Automated data audit (`scripts/audit_dataset.py`)
+- [x] Real-anchored synthetic data (`scripts/generate_synthetic.py`) — train only
+- [x] Signer-independent split & augmentation per theory (`scripts/train.py`)
+- [x] Controlled benchmark (`scripts/benchmark.py`)
+- [x] Python ↔ JS parity test (`scripts/check_parity.py`) — passing
+- [x] Core demo UI: big letter, confidence meter, transcript, `id-ID` TTS
+- [x] **Real data: 510 landmarks from a public MIT-licensed BISINDO dataset**
+- [x] **Model v1: MLP, 26 letters, 92.2% (random split, single signer)**
+- [x] Verified against all 510 gesture images through the browser path: 93.9%
+- [x] Landing page + production deploy (GitHub Pages, HTTPS)
+- [ ] New signer recordings → honest signer-independent evaluation
+- [ ] Real user testing + demo video
+- [ ] Practice mode & service phrases (stretch)
 
-> ℹ️ `data/samples/rhiosutoyo_dataset.csv` adalah snapshot landmark hasil ekstraksi
-> dataset publik berlisensi MIT. `web/model.json` dilatih darinya + 880 sampel
-> sintetis (`generate_synthetic.py`, train saja). Angka 92,2% memakai split acak
-> karena dataset itu hanya punya 1 periset — angka yang jujur menanti rekaman
-> periset baru.
+> ℹ️ `data/samples/rhiosutoyo_dataset.csv` is a landmark snapshot extracted from
+> the MIT-licensed public dataset. `web/model.json` was trained on it plus 880
+> synthetic samples (training only). The 92.2% figure uses a random split
+> because that dataset has a single signer — honest signer-independent numbers
+> await new signer recordings.
 
-Rencana harian detail ada di [`docs/PLAN.md`](docs/PLAN.md), panduan data di
-[`docs/DATA.md`](docs/DATA.md), dan template submission di
+Daily plan in [`docs/PLAN.md`](docs/PLAN.md), data methodology in
+[`docs/DATA.md`](docs/DATA.md), submission draft in
 [`docs/devpost-submission.md`](docs/devpost-submission.md).

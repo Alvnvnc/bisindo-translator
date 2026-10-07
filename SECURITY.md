@@ -1,39 +1,39 @@
-# Keamanan & Privasi — Jemari
+# Security & Privacy — Jemari
 
-## Tanpa rahasia, by design
+## No secrets, by design
 
-Aplikasi ini **100% sisi klien (client-side)**:
+This application is **100% client-side**:
 
-- **Tidak ada API key, token, atau secret** di kode, konfigurasi, maupun CI.
-- **Tidak ada backend/server** milik proyek — hanya berkas statis.
-- Satu-satunya permintaan jaringan saat runtime:
-  1. MediaPipe Tasks Vision (WASM + model landmark) dari CDN publik jsDelivr
-     dan `storage.googleapis.com` (aset publik Google),
-  2. memuat `model.json` & thumbnail referensi dari repo ini sendiri.
+- **No API keys, tokens, or secrets** anywhere in the code, configuration, or CI.
+- **No backend server** of our own — it is a static site.
+- The only network requests at runtime:
+  1. MediaPipe Tasks Vision (WASM + landmark model) from the public jsDelivr CDN
+     and `storage.googleapis.com` (public Google-hosted assets),
+  2. loading `model.json` and reference thumbnails from this same repository.
 
-Karena tidak ada rahasia yang perlu dijaga, permukaan serangannya minimal:
-yang dilindungi bukan key, melainkan **pengguna di depan kamera**.
+Because there is nothing secret to protect, the attack surface is minimal:
+what we protect is not a key, but **the user in front of the camera**.
 
-## Privasi pengguna
+## User privacy
 
-- **Video kamera tidak pernah meninggalkan perangkat.** Seluruh deteksi landmark
-  dan klasifikasi berjalan lokal (WebAssembly/WebGL + JavaScript).
-- **Tidak ada telemetri, cookie pelacak, atau analitik.**
-- Fitur perekaman dataset (`web/capture.html`) menyimpan **vektor 63 angka**
-  di `localStorage` perangkat pengguna; tidak ada gambar/wajah yang disimpan,
-  dan ekspor CSV hanya terjadi bila pengguna menekan tombolnya.
+- **Camera video never leaves the device.** All landmark detection and
+  classification runs locally (WebAssembly/WebGL + JavaScript).
+- **No telemetry, tracking cookies, or analytics.**
+- The dataset recorder (`web/capture.html`) stores **63-number vectors** in the
+  browser's `localStorage`; no images or faces are ever stored, and CSV export
+  only happens when the user presses the button.
 
-## Melaporkan kerentanan
+## Reporting a vulnerability
 
-Buka issue di repositori ini, atau hubungi pemilik repo melalui GitHub.
-Mohon sertakan langkah reproduksi. Respons dalam ±48 jam.
+Open an issue in this repository, or contact the repo owner via GitHub.
+Please include reproduction steps. Response within ~48 hours.
 
-## Catatan lingkungan hosting
+## Hosting environment notes
 
-GitHub Pages tidak mengizinkan custom HTTP header (mis. `Content-Security-Policy`
-via header). Mitigasi yang dipilih:
+GitHub Pages does not allow custom HTTP headers (e.g. a `Content-Security-Policy`
+header). The chosen mitigations:
 
-- Halaman tidak memproses data sensitif apa pun dari pengguna (lihat Privasi).
-- Semua aset pihak ketiga dimuat dari CDN resmi (jsDelivr, Google storage) dengan
-  URL yang dipatok di `web/hands.js`.
-- Tidak ada form, tidak ada input yang dikirim ke mana pun.
+- The pages process no sensitive user data (see Privacy).
+- All third-party assets load from official CDNs (jsDelivr, Google storage) with
+  URLs pinned in `web/hands.js`.
+- There are no forms, and no input is ever submitted anywhere.

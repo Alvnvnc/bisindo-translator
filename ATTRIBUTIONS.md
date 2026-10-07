@@ -1,38 +1,54 @@
-# Jemari — Atribusi & Lisensi
+# Jemari — Attributions & Licenses
 
-Proyek ini dibangun di atas karya open-source berikut. Dicantumkan sesuai ketentuan
-lisensi masing-masing, sekaligus sebagai transparansi untuk submission Devpost.
+This project builds on the following open-source work. Credits are listed as
+required by each license, and for transparency toward the hackathon judges.
 
-## Komponen pihak ketiga
+## Third-party components
 
-| Komponen | Digunakan untuk | Sumber | Lisensi |
+| Component | Used for | Source | License |
 |---|---|---|---|
-| MediaPipe Hand Landmarker (Google) | Deteksi 21 titik landmark tangan, runtime di browser & ekstraksi dataset | https://github.com/google-ai-edge/mediapipe | Apache-2.0 |
-| Model `hand_landmarker.task` | Bobot pretrained landmark | https://storage.googleapis.com/mediapipe-models/hand_landmarker/ | Apache-2.0 (Google) |
-| scikit-learn | Training & evaluasi classifier (KNN, MLP, RandomForest) | https://github.com/scikit-learn/scikit-learn | BSD-3-Clause |
-| NumPy | Komputasi array | https://github.com/numpy/numpy | BSD-3-Clause |
-| OpenCV | Membaca gambar/video untuk ekstraksi landmark | https://github.com/opencv/opencv | Apache-2.0 |
+| MediaPipe Hand Landmarker (Google) | 21 hand keypoints, browser runtime & dataset extraction | https://github.com/google-ai-edge/mediapipe | Apache-2.0 |
+| `hand_landmarker.task` model | Pretrained landmark weights | https://storage.googleapis.com/mediapipe-models/hand_landmarker/ | Apache-2.0 (Google) |
+| scikit-learn | Classifier training & evaluation (KNN, MLP, RandomForest) | https://github.com/scikit-learn/scikit-learn | BSD-3-Clause |
+| NumPy | Array computation | https://github.com/numpy/numpy | BSD-3-Clause |
+| OpenCV | Reading images/videos for landmark extraction | https://github.com/opencv/opencv | Apache-2.0 |
 
-## Referensi yang dipelajari
+## Datasets
 
-Repo berikut dipakai sebagai **referensi arsitektur**, bukan disalin:
+| Dataset | Used for | Source | License |
+|---|---|---|---|
+| BISINDO Hand-Sign Detection Dataset (rhiosutoyo) | 510 landmark samples (26 letters), used in an IEEE ICRAIE 2023 paper | https://github.com/rhiosutoyo/Indonesian-Sign-Language-BISINDO-Hand-Sign-Detection-Dataset | **MIT** — citation below |
+| Self-recorded samples (`web/capture.html`) | Community-growable dataset | This repository | CC BY 4.0 (ours) |
 
-- `khairul3/BISINDO-Sign-Language-Recognition` — pendekatan pengenalan BISINDO
-- `daf2a/Sign_Language_Translator_Web_App` — pola MediaPipe di web app
-- `gabguerin/Sign-Language-Recognition--MediaPipe-DTW` — landmark → klasifikasi
+Citation for the dataset:
 
-Seluruh kode di repo ini ditulis sendiri oleh tim Jemari, kecuali yang
-disebutkan pada tabel di atas.
+```bibtex
+@INPROCEEDINGS{10468194,
+  author  = {Joan, David and Vincent, Vincent and Daniel, Kevin Jason and
+             Achmad, Said and Sutoyo, Rhio},
+  booktitle = {2023 IEEE 8th International Conference on Recent Advances
+               and Innovations in Engineering (ICRAIE)},
+  title   = {BISINDO Hand-Sign Detection Using Transfer Learning},
+  year    = {2023},
+  pages   = {1-7},
+  doi     = {10.1109/ICRAIE59459.2023.10468194}
+}
+```
 
-## Dataset
+The reference thumbnails in `web/ref/` are derived from the same MIT-licensed
+dataset (resized copies, 3 per letter).
 
-- Dataset isyarat BISINDO: _sumber dan lisensinya harus diisi sendiri setelah
-  diunduh dan diverifikasi_ (kandidat: Mendeley Data "BISINDO Sign Language
-  Recognition"). **Jangan** memakai dataset tanpa memeriksa lisensinya, dan
-  jangan mengklaim data yang tidak benar-benar dipakai.
-- Sampel yang direkam sendiri melalui `web/capture.html`: milik tim, boleh
-  dirilis di repo ini.
+## Repositories studied as references
 
-## Lisensi proyek ini
+Used as **architectural references**, not copied:
 
-Kode Jemari dirilis di bawah **MIT License** — lihat `LICENSE`.
+- `khairul3/BISINDO-Sign-Language-Recognition` — BISINDO recognition approach
+- `daf2a/Sign_Language_Translator_Web_App` — MediaPipe-in-webapp patterns
+- `gabguerin/Sign-Language-Recognition--MediaPipe-DTW` — landmarks → classification
+
+All code in this repository was written by the Jemari team, except the
+components listed in the tables above.
+
+## License of this project
+
+The Jemari code is released under the **MIT License** — see `LICENSE`.

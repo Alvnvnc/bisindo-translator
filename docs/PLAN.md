@@ -1,5 +1,7 @@
 # Rencana Sprint 5 Hari — Jemari
 
+> **Note (EN):** internal sprint log, written in Bahasa Indonesia.
+
 **Deadline:** 9 Oktober 2026, 11:45pm PDT (≈ 10 Okt 13:45 WIB).
 **Aturan utama:** jangan menambah fitur baru di luar scope yang sudah dikunci.
 Kedalaman eksekusi > banyaknya fitur.

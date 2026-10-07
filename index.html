@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="id">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Jemari — Dari isyarat jemari, menjadi suara</title>
+    <title>Jemari — From fingertip signs to spoken words</title>
     <meta
       name="description"
-      content="Jemari menerjemahkan alfabet BISINDO menjadi teks dan suara secara real-time, sepenuhnya di perangkat — tanpa server, tanpa akun, tanpa data yang terkirim."
+      content="Jemari translates BISINDO (Indonesian Sign Language) alphabet signs into text and speech in real time — entirely on your device. No server, no account, no data sent."
     />
     <style>
       :root {
@@ -42,7 +42,7 @@
       .logo { font-size: 64px; line-height: 1; }
       h1 { font-size: clamp(40px, 7vw, 64px); margin: 18px 0 8px; letter-spacing: -0.03em; }
       .tagline { font-size: clamp(17px, 2.6vw, 21px); color: var(--text); margin: 0 0 10px; font-weight: 550; }
-      .sub { color: var(--text-dim); max-width: 640px; margin: 0 auto 30px; font-size: 15.5px; }
+      .sub { color: var(--text-dim); max-width: 660px; margin: 0 auto 30px; font-size: 15.5px; }
       .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
       .btn {
         display: inline-block; padding: 13px 26px; border-radius: 12px; font-weight: 600;
@@ -81,7 +81,7 @@
         <div class="brand"><span class="mark">🤟</span> Jemari</div>
         <div>
           <a href="web/index.html">Demo</a>
-          <a href="web/capture.html">Rekam &amp; Latih</a>
+          <a href="web/capture.html">Record &amp; Train</a>
           <a href="https://github.com/Alvnvnc/bisindo-translator" target="_blank" rel="noopener">GitHub</a>
         </div>
       </nav>
@@ -89,70 +89,70 @@
       <header class="hero">
         <div class="logo">🤟</div>
         <h1>Jemari</h1>
-        <p class="tagline">Dari isyarat jemari, menjadi suara.</p>
+        <p class="tagline">From fingertip signs to spoken words.</p>
         <p class="sub">
-          Penerjemah alfabet BISINDO menjadi teks dan suara secara real-time —
-          sepenuhnya berjalan di perangkat Anda. Dibuat untuk jembatan komunikasi
-          di layanan publik: puskesmas, kantor desa, bank, sekolah.
+          A real-time BISINDO (Indonesian Sign Language) alphabet translator that runs
+          entirely on your device — built as a communication bridge at public service
+          counters: clinics, village offices, banks, schools.
         </p>
         <div class="cta">
-          <a class="btn primary" href="web/index.html">🚀 Coba Demo Live</a>
-          <a class="btn" href="web/capture.html">🎥 Rekam &amp; Latih</a>
+          <a class="btn primary" href="web/index.html">🚀 Try the Live Demo</a>
+          <a class="btn" href="web/capture.html">🎥 Record &amp; Train</a>
         </div>
         <div class="chips">
-          <span class="chip"><b>26</b> huruf BISINDO</span>
-          <span class="chip"><b>92,2%</b> akurasi hold-out</span>
-          <span class="chip"><b>0</b> byte video terkirim</span>
-          <span class="chip">model <b>366 KB</b></span>
-          <span class="chip">tanpa akun &amp; tanpa API key</span>
+          <span class="chip"><b>26</b> BISINDO letters</span>
+          <span class="chip"><b>92.2%</b> hold-out accuracy</span>
+          <span class="chip"><b>0</b> bytes of video sent</span>
+          <span class="chip"><b>366 KB</b> model</span>
+          <span class="chip">no account · no API keys</span>
         </div>
       </header>
 
       <section class="blocks">
         <div class="card">
           <div class="ico">📷</div>
-          <h2>Kamera → landmark</h2>
-          <p>MediaPipe Hand Landmarker mengekstrak 21 titik tangan per frame, langsung di browser (WASM/WebGL).</p>
+          <h2>Camera → keypoints</h2>
+          <p>MediaPipe Hand Landmarker extracts 21 hand keypoints per frame, in-browser (WASM/WebGL).</p>
         </div>
         <div class="card">
           <div class="ico">🧠</div>
-          <h2>Classifier hasil latihan sendiri</h2>
-          <p>MLP kecil (366 KB) dilatih pada data BISINDO nyata, dijalankan penuh di sisi klien — bukan panggilan API.</p>
+          <h2>Self-trained classifier</h2>
+          <p>A small MLP (366 KB) trained on real BISINDO data, executed fully client-side — not an API call.</p>
         </div>
         <div class="card">
           <div class="ico">🔊</div>
-          <h2>Teks &amp; suara Indonesia</h2>
-          <p>Hasil terjemahan ditampilkan besar dan dapat diucapkan lewat Web Speech API bahasa Indonesia.</p>
+          <h2>Text &amp; Indonesian speech</h2>
+          <p>Recognized letters build a transcript that can be spoken aloud via the Web Speech API — in Bahasa Indonesia, because that's who's listening at the counter.</p>
         </div>
         <div class="card">
           <div class="ico">🔒</div>
-          <h2>Privasi by design</h2>
-          <p>Video tidak pernah meninggalkan perangkat. Tidak ada server, tidak ada API key, tidak ada pelacakan.</p>
+          <h2>Privacy by design</h2>
+          <p>Video never leaves the device. No server, no API keys, no tracking, no analytics.</p>
         </div>
         <div class="card">
           <div class="ico">📖</div>
-          <h2>Terbuka &amp; bisa direproduksi</h2>
-          <p>Kode MIT, dataset publik berlisensi, data landmark &amp; metrik evaluasi tersedia di repo. Audit data otomatis.</p>
+          <h2>Open &amp; reproducible</h2>
+          <p>MIT code, licensed public dataset, landmark data and evaluation metrics in the repo. Automated data audits included.</p>
         </div>
         <div class="card">
           <div class="ico">🤝</div>
-          <h2>Dibangun untuk dipercaya</h2>
-          <p>Split &amp; benchmark terkontrol, laporan terbuka, dan keterbatasan diakui apa adanya di dokumentasi.</p>
+          <h2>Built to be trusted</h2>
+          <p>Controlled splits and benchmarks, open reports, and honestly acknowledged limitations in the docs.</p>
         </div>
       </section>
 
       <section class="name">
-        <h2>Kenapa “Jemari”?</h2>
+        <h2>Why “Jemari”?</h2>
         <p>
-          Karena di situlah bahasa isyarat hidup: pada jemari yang bergerak. Aplikasi ini
-          membaca gerakan itu lalu menghadirkan suara — supaya setiap jemari bisa didengar,
-          di mana saja, tanpa perantara.
+          <em>Jemari</em> means “fingers” in Bahasa Indonesia — because that is where
+          sign language lives. The app reads those moving fingers and gives them a
+          voice, anywhere, without an intermediary.
         </p>
       </section>
 
       <footer>
         <span>Jemari · ML Empowerment Build Challenge 3.0</span>
-        <span>Kode: MIT · MediaPipe &amp; dataset: kredit di <a href="ATTRIBUTIONS.md">ATTRIBUTIONS.md</a></span>
+        <span>Code: MIT · MediaPipe &amp; dataset credits in <a href="ATTRIBUTIONS.md">ATTRIBUTIONS.md</a></span>
       </footer>
     </div>
   </body>

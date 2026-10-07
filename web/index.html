@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="id">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Jemari — Penerjemah Bahasa Isyarat</title>
+    <title>Jemari — Sign Language Translator</title>
     <meta
       name="description"
-      content="Terjemahkan isyarat tangan BISINDO menjadi teks dan suara secara real-time, langsung di perangkat Anda."
+      content="Translate BISINDO (Indonesian Sign Language) hand signs into text and speech in real time, entirely on your device."
     />
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -16,54 +16,55 @@
         <span class="brand-mark" aria-hidden="true">🤟</span>
         <div>
           <h1>Jemari</h1>
-          <p class="brand-sub">Dari isyarat jemari, menjadi suara</p>
+          <p class="brand-sub">From fingertip signs to spoken words</p>
         </div>
       </div>
-      <div class="model-badge" id="modelBadge">Memuat model…</div>
+      <div class="model-badge" id="modelBadge">Loading model…</div>
     </header>
 
     <main class="layout">
-      <!-- Kolom kiri: kamera -->
-      <section class="card stage" aria-label="Pratinjau kamera">
+      <!-- Left column: camera -->
+      <section class="card stage" aria-label="Camera preview">
         <div class="mirror" id="mirror">
           <video id="video" playsinline muted></video>
           <canvas id="overlay"></canvas>
         </div>
 
         <div class="stage-controls">
-          <button id="startBtn" class="btn btn-primary">Mulai kamera</button>
-          <button id="stopBtn" class="btn" disabled>Berhenti</button>
-          <span class="hint" id="stageHint">Izinkan akses kamera untuk mulai.</span>
+          <button id="startBtn" class="btn btn-primary">Start camera</button>
+          <button id="stopBtn" class="btn" disabled>Stop</button>
+          <span class="hint" id="stageHint">Allow camera access to begin.</span>
         </div>
       </section>
 
-      <!-- Kolom kanan: hasil -->
-      <section class="card result" aria-label="Hasil terjemahan">
+      <!-- Right column: results -->
+      <section class="card result" aria-label="Translation results">
         <div class="letter-box">
           <div class="letter" id="letter" aria-live="polite">–</div>
           <div class="meter">
             <div class="meter-fill" id="meterFill"></div>
           </div>
-          <div class="letter-meta" id="letterMeta">Menunggu gestur…</div>
+          <div class="letter-meta" id="letterMeta">Waiting for a sign…</div>
         </div>
 
         <div class="transcript-head">
-          <h2>Kalimat</h2>
+          <h2>Transcript</h2>
           <div class="transcript-actions">
-            <button id="speakBtn" class="btn btn-small">🔊 Ucapkan</button>
-            <button id="copyBtn" class="btn btn-small">Salin</button>
-            <button id="clearBtn" class="btn btn-small">Bersihkan</button>
+            <button id="speakBtn" class="btn btn-small">🔊 Speak</button>
+            <button id="copyBtn" class="btn btn-small">Copy</button>
+            <button id="clearBtn" class="btn btn-small">Clear</button>
           </div>
         </div>
         <p class="transcript" id="transcript" aria-live="polite"></p>
 
         <details class="tips">
-          <summary>Cara pakai</summary>
+          <summary>How to use</summary>
           <ul>
-            <li>Posisikan tangan di tengah frame, jarak ± 40 cm dari kamera.</li>
-            <li>Tahan setiap isyarat sekitar 1 detik sampai huruf muncul.</li>
-            <li>Pencahayaan merata membantu akurasi.</li>
-            <li>Semua proses berjalan di perangkat Anda — video tidak pernah dikirim ke server.</li>
+            <li>Center your hand in the frame, about 40 cm from the camera.</li>
+            <li>Hold each sign for about a second until the letter appears.</li>
+            <li>Even lighting helps recognition.</li>
+            <li>Everything runs on your device — video is never sent to a server.</li>
+            <li>Speech output is Bahasa Indonesia, matching the counter staff who listen.</li>
           </ul>
         </details>
       </section>
@@ -71,7 +72,7 @@
 
     <footer class="footer">
       <span>Jemari · ML Empowerment Build Challenge 3.0</span>
-      <span>100% on-device · MediaPipe + classifier hasil training sendiri</span>
+      <span>100% on-device · MediaPipe + self-trained classifier</span>
     </footer>
 
     <script type="module" src="app.js"></script>

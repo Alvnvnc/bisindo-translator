@@ -65,7 +65,7 @@ async function loadModel() {
     state.model = await res.json();
   } catch (err) {
     state.model = null;
-    console.warn("model.json tidak termuat — panduan prediksi nonaktif.");
+    console.warn("model.json not loaded — prediction guide disabled.");
   }
 }
 
@@ -84,7 +84,7 @@ async function loadReference(letter) {
   box.innerHTML = "";
 
   if (!/^[A-Za-z]$/.test(letter)) {
-    box.innerHTML = '<span class="ref-empty">ketik satu huruf A–Z</span>';
+    box.innerHTML = '<span class="ref-empty">type a single letter A–Z</span>';
     return;
   }
   const K = letter.toUpperCase();
@@ -103,11 +103,11 @@ async function loadReference(letter) {
   try {
     if (!refManifest) {
       const mres = await fetch("ref/index.json", { cache: "no-store" });
-      if (!mres.ok) throw new Error("manifest tidak tersedia");
+      if (!mres.ok) throw new Error("manifest unavailable");
       refManifest = await mres.json();
     }
     const files = refManifest[K] || [];
-    if (!files.length) throw new Error("huruf tidak ada di manifest");
+    if (!files.length) throw new Error("letter missing from manifest");
     render(files, `ref/${K}`);
     return;
   } catch {
@@ -124,12 +124,12 @@ async function loadReference(letter) {
       .map((a) => a.getAttribute("href"))
       .filter((h) => h && /\.jpe?g$/i.test(h))
       .slice(0, 3);
-    if (!files.length) throw new Error("kosong");
+    if (!files.length) throw new Error("empty");
     render(files, `../data/raw/${K}/rhiosutoyo`);
   } catch {
     box.innerHTML =
-      '<span class="ref-empty">referensi tidak tersedia — salin dataset ke ' +
-      "data/raw/&lt;HURUF&gt;/rhiosutoyo/ atau tiru dari chart BISINDO</span>";
+      '<span class="ref-empty">references unavailable — copy the dataset to ' +
+      "data/raw/&lt;LETTER&gt;/rhiosutoyo/ or follow a BISINDO chart</span>";
   }
 }
 
@@ -192,7 +192,7 @@ function renderTable() {
     const n = entries.length;
     total += n;
     const signers = new Set(entries.map((e) => e.s || "unknown"));
-    const signerInfo = signers.size ? `${signers.size} periset` : "tanpa metadata";
+    const signerInfo = signers.size ? `${signers.size} signer(s)` : "no metadata";
 
     const tr = document.createElement("tr");
     const pillClass = n >= 300 ? "pill" : "pill pill-warn";
@@ -205,8 +205,8 @@ function renderTable() {
   }
 
   totalStatus.textContent = labels.length
-    ? `${labels.length} kelas · ${total} sampel total`
-    : "Belum ada data. Rekam kelas pertama Anda.";
+    ? `${labels.length} classes · ${total} samples total`
+    : "No data yet. Record your first class.";
 }
 
 function escapeHtml(s) {
@@ -219,14 +219,14 @@ classRows.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-del]");
   if (!btn) return;
   const label = btn.dataset.del;
-  if (confirm(`Hapus semua sampel kelas "${label}"?`)) deleteClass(label);
+  if (confirm(`Delete all samples of class "${label}"?`)) deleteClass(label);
 });
 
 /* -------------------------------- kamera -------------------------------- */
 
 async function start() {
   startBtn.disabled = true;
-  camStatus.textContent = "Menyiapkan kamera & model MediaPipe…";
+  camStatus.textContent = "Preparing camera & MediaPipe model…";
   try {
     if (!state.landmarker) state.landmarker = await createHandLandmarker();
     await startCamera(video);
@@ -235,14 +235,14 @@ async function start() {
     state.running = true;
     stopBtn.disabled = false;
     recordBtn.disabled = false;
-    camStatus.textContent = "Kamera aktif.";
+    camStatus.textContent = "Camera active.";
     camStatus.className = "status ok";
-    recordHint.textContent = "Pilih kelas lalu tekan Rekam.";
+    recordHint.textContent = "Pick a class, then press Record.";
     loop();
   } catch (err) {
     console.error(err);
     startBtn.disabled = false;
-    camStatus.textContent = `Gagal: ${err.message}`;
+    camStatus.textContent = `Failed: ${err.message}`;
     camStatus.className = "status err";
   }
 }
@@ -255,9 +255,9 @@ function stop() {
   startBtn.disabled = false;
   stopBtn.disabled = true;
   recordBtn.disabled = true;
-  camStatus.textContent = "Kamera dimatikan.";
+  camStatus.textContent = "Camera stopped.";
   camStatus.className = "status";
-  recordHint.textContent = "Aktifkan kamera dulu.";
+  recordHint.textContent = "Start the camera first.";
 }
 
 function loop() {
@@ -282,14 +282,14 @@ function updatePrediction(landmarks) {
 
   if (!landmarks || !state.model) {
     predLetter.textContent = "–";
-    predMeta.textContent = landmarks ? "model tidak termuat" : "tunjukkan tangan ke kamera";
+    predMeta.textContent = landmarks ? "model not loaded" : "show your hand to the camera";
     return;
   }
 
   const r = predict(state.model, normalizeLandmarks(landmarks));
   if (!r) return;
   predLetter.textContent = r.label;
-  predMeta.textContent = `keyakinan ${(r.confidence * 100).toFixed(0)}%`;
+  predMeta.textContent = `confidence ${(r.confidence * 100).toFixed(0)}%`;
 }
 
 /* ------------------------------- rekaman -------------------------------- */
@@ -302,7 +302,7 @@ function setStatus(text, kind = "") {
 async function record() {
   const label = classInput.value.trim().toUpperCase();
   if (!label) {
-    setStatus("Isi nama kelas dulu (mis. A).", "err");
+    setStatus("Enter a class name first (e.g. A).", "err");
     classInput.focus();
     return;
   }
@@ -316,7 +316,7 @@ async function record() {
   state.recording = true;
   recordBtn.disabled = true;
   progressFill.style.width = "0%";
-  setStatus(`Merekam ${target} frame… gerakkan tangan perlahan.`);
+  setStatus(`Recording ${target} frames… move your hand slowly.`);
 
   const MIN_INTERVAL_MS = 90; // jeda minimum antar sampel
   const MIN_DISTANCE = 0.004; // buang duplikat yang nyaris identik
@@ -335,8 +335,8 @@ async function record() {
       if (now - startedAt > timeoutMs) {
         setStatus(
           collected.length
-            ? `Waktu habis — ${collected.length}/${target} frame terekam.`
-            : "Waktu habis — tidak ada frame terekam. Pastikan tangan terlihat dan bergerak.",
+            ? `Timed out — ${collected.length}/${target} frames captured.`
+            : "Timed out — no frames captured. Make sure your hand is visible and moving.",
           collected.length ? "" : "err",
         );
         return resolve();
@@ -352,12 +352,12 @@ async function record() {
           collected.push(current);
           lastCaptureAt = now;
           progressFill.style.width = `${(collected.length / target) * 100}%`;
-          setStatus(`Merekam… ${collected.length}/${target} — ubah posisi tangan sedikit.`);
+          setStatus(`Recording… ${collected.length}/${target} — shift your hand slightly.`);
         } else if (now - lastCaptureAt > 700) {
-          setStatus(`Merekam… ${collected.length}/${target} — tangan terlalu diam, geser perlahan.`);
+          setStatus(`Recording… ${collected.length}/${target} — hand too still, move it slowly.`);
         }
       } else if (now - lastHandAt > NO_HAND_LIMIT_MS) {
-        setStatus("Tangan tidak terdeteksi — tampilkan tangan ke kamera.", "err");
+        setStatus("No hand detected — show your hand to the camera.", "err");
         return resolve();
       }
 
@@ -372,7 +372,7 @@ async function record() {
 
   if (collected.length) {
     addSamples(label, collected, session, signer);
-    setStatus(`${collected.length} sampel → kelas "${label}" · sesi ${session} · periset ${signer}.`, "ok");
+    setStatus(`${collected.length} samples → class "${label}" · session ${session} · signer ${signer}.`, "ok");
     classInput.value = nextClass(label);
   }
 }
@@ -400,7 +400,7 @@ function exportCsv() {
   const store = loadStore();
   const labels = Object.keys(store).sort();
   if (!labels.length) {
-    setStatus("Belum ada data untuk diekspor.", "err");
+    setStatus("No data to export yet.", "err");
     return;
   }
 
@@ -423,7 +423,7 @@ function exportCsv() {
 
   const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
   downloadBlob(new Blob([lines.join("\n")], { type: "text/csv" }), `jemari_samples_${stamp}.csv`);
-  setStatus(`${total} sampel diekspor (dengan session & signer). Simpan ke data/samples/.`, "ok");
+  setStatus(`${total} samples exported (with session & signer). Save into data/samples/.`, "ok");
 }
 
 function csvEscape(value) {
@@ -445,13 +445,13 @@ async function importCsv(file) {
   const text = await file.text();
   const lines = text.trim().split(/\r?\n/);
   if (lines.length < 2) {
-    setStatus("File CSV kosong.", "err");
+    setStatus("CSV file is empty.", "err");
     return;
   }
 
   const header = lines[0].split(",");
   if (header[0] !== "class" || header.length < FEATURE_DIM + 1) {
-    setStatus("Format CSV tidak dikenali (butuh kolom class,f0..f62[,session,signer]).", "err");
+    setStatus("Unrecognized CSV format (needs columns class,f0..f62[,session,signer]).", "err");
     return;
   }
 
@@ -477,7 +477,7 @@ async function importCsv(file) {
 
   saveStore(store);
   renderTable();
-  setStatus(`${added} sampel diimpor dari ${file.name}.`, added ? "ok" : "err");
+  setStatus(`${added} samples imported from ${file.name}.`, added ? "ok" : "err");
 }
 
 /* -------------------------------- wiring -------------------------------- */
@@ -495,10 +495,10 @@ importInput.addEventListener("change", (e) => {
   e.target.value = "";
 });
 clearBtn.addEventListener("click", () => {
-  if (confirm("Hapus seluruh dataset tersimpan di browser? Ekspor dulu bila perlu.")) {
+  if (confirm("Delete the entire dataset stored in this browser? Export first if needed.")) {
     localStorage.removeItem(STORAGE_KEY);
     renderTable();
-    setStatus("Semua data dihapus.", "ok");
+    setStatus("All data deleted.", "ok");
   }
 });
 
