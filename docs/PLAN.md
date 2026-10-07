@@ -1,4 +1,4 @@
-# Rencana Sprint 5 Hari — HandTalk ID
+# Rencana Sprint 5 Hari — Sasmita
 
 **Deadline:** 9 Oktober 2026, 11:45pm PDT (≈ 10 Okt 13:45 WIB).
 **Aturan utama:** jangan menambah fitur baru di luar scope yang sudah dikunci.

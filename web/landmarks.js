@@ -1,5 +1,5 @@
 /**
- * Inti matematika HandTalk ID — dipakai bersama oleh app.js (demo) dan
+ * Inti matematika Sasmita — dipakai bersama oleh app.js (demo) dan
  * capture.js (perekam dataset).
  *
  * PENTING: normalizeLandmarks() di sini harus identik dengan

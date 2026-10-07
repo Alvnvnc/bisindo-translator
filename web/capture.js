@@ -399,7 +399,7 @@ function exportCsv() {
   }
 
   const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
-  downloadBlob(new Blob([lines.join("\n")], { type: "text/csv" }), `handtalk_samples_${stamp}.csv`);
+  downloadBlob(new Blob([lines.join("\n")], { type: "text/csv" }), `sasmita_samples_${stamp}.csv`);
   setStatus(`${total} sampel diekspor (dengan session & signer). Simpan ke data/samples/.`, "ok");
 }
 

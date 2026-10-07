@@ -1,4 +1,4 @@
-# Draft Submission Devpost — HandTalk ID
+# Draft Submission Devpost — Sasmita
 
 Template ini mengikuti persis field yang diminta panitia. Isi bagian `[...]`,
 **verifikasi setiap angka dari sumber resmi** sebelum menyalin ke Devpost.
@@ -7,10 +7,14 @@ Template ini mengikuti persis field yang diminta panitia. Isi bagian `[...]`,
 
 ## Project Title
 
-**HandTalk ID** — jembatan bahasa isyarat di layanan publik
+**Sasmita** — dari isyarat jemari, menjadi suara
 
-*(Alternatif bila nama sudah dipakai peserta lain: "HandTalk ID: BISINDO Bridge",
-"IsyaratKita", "Jari Bicara")*
+Nama diambil dari KBBI: *sasmita* — "gerakan bagian tubuh, seperti tangan, lengan,
+bahu, kepala, mata, dan sebagainya, yang mempunyai isyarat tertentu; isyarat
+tubuh". Persis mendeskripsikan apa yang dilakukan aplikasi ini: membaca gerakan
+jemari lalu menghadirkan suara.
+
+*(Alternatif bila nama sudah dipakai peserta lain: "Jemari", "TanganBicara")*
 
 ---
 
@@ -22,7 +26,7 @@ ML Empowerment Build Challenge 3.0 — kategori bebas (tidak ada tema wajib).
 
 ## What it does
 
-HandTalk ID menerjemahkan isyarat tangan Bahasa Isyarat Indonesia menjadi teks dan
+Sasmita menerjemahkan isyarat tangan Bahasa Isyarat Indonesia menjadi teks dan
 suara secara real-time, langsung di browser. Pengguna cukup menyalakan kamera dan
 memberi isyarat; huruf demi huruf muncul dan bisa langsung diucapkan dengan suara
 bahasa Indonesia agar lawan bicara yang tidak memahami bahasa isyarat tetap bisa
@@ -53,7 +57,7 @@ dokumen menjadi pengalaman yang melelahkan dan bergantung pada orang lain.
 
 ## Solution Overview
 
-HandTalk ID mengubah kamera ponsel atau laptop menjadi penerjemah isyarat yang
+Sasmita mengubah kamera ponsel atau laptop menjadi penerjemah isyarat yang
 selalu tersedia, tanpa aplikasi khusus dan tanpa biaya langganan:
 
 1. **Deteksi tangan** — MediaPipe Hand Landmarker mengekstrak 21 titik kunci tangan
@@ -95,8 +99,7 @@ dengan koneksi terbatas tanpa mengirim data pribadi siapa pun.
 | Python 3.12 + scikit-learn | Training & evaluasi classifier (KNN, MLP, RandomForest) |
 | NumPy / OpenCV | Praproses data, ekstraksi landmark dari dataset gambar |
 | localStorage | Penyimpanan dataset rekaman di sisi klien |
-| `[opsional] Featherless.ai` | `[isi bila dipakai, mis. untuk parafrase kalimat isyarat]` |
-| `[opsional] Mobbin` | Referensi pola UI saat merancang tampilan |
+| GitHub Actions / Pages | `[opsional]` hosting live demo (HTTPS agar kamera diizinkan browser) |
 
 Kredit lengkap komponen open-source dan lisensinya ada di
 [`ATTRIBUTIONS.md`](../ATTRIBUTIONS.md).

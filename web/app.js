@@ -1,5 +1,5 @@
 /**
- * HandTalk ID — demo terjemahan real-time.
+ * Sasmita — demo terjemahan real-time.
  * Alur: kamera → MediaPipe landmark → normalize → classifier → smoothing → UI/TTS.
  */
 
