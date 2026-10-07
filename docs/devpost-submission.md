@@ -178,9 +178,9 @@ yang sudah diverifikasi + sumbernya.]`
 
 ## Project Link / Repository
 
-- Repo GitHub (public): `[https://github.com/…]`
-- Live demo: `[GitHub Pages / Vercel / Netlify — perlu HTTPS agar kamera berfungsi]`
-- Catatan: `model.json` hasil training harus ikut ter-deploy
+- **Live demo:** https://alvnvnc.github.io/bisindo-translator/ (HTTPS — kamera & TTS berfungsi; uji di laptop maupun HP)
+- **Repo GitHub (public):** https://github.com/Alvnvnc/bisindo-translator
+- `model.json` (hasil training) & data landmark ikut ter-deploy — demo berjalan penuh tanpa backend
 
 ## Team Details
 
