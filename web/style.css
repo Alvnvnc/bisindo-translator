@@ -372,6 +372,64 @@ table.classes td.num {
   color: #ffc107;
 }
 
+.ref-pred-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 14px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.ref-box {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.pred-box {
+  flex: 0 0 170px;
+  text-align: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+}
+
+.ref-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.ref-images {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ref-images img {
+  width: 74px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #000;
+}
+
+.ref-empty {
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+
+.pred-letter {
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--accent);
+}
+
 .progress {
   height: 8px;
   background: var(--surface-2);

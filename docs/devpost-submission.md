@@ -105,15 +105,39 @@ Kredit lengkap komponen open-source dan lisensinya ada di
 
 ## Model & Evaluasi
 
-Isi setelah training selesai — **pakai angka nyata dari `reports/`**, jangan dikarang:
+**Data** — 510 sampel landmark, 26 kelas huruf BISINDO. Sumber: dataset publik
+"BISINDO Hand-Sign Detection" (rhiosutoyo, **MIT License**; dipakai pada paper
+IEEE ICRAIE 2023), diekstraksi dengan MediaPipe Hand Landmarker — 510 dari 520
+gambar terdeteksi tangannya (98%). Ditambah 880 sampel sintetis real-anchored
+(mixup + PCA dari data nyata) untuk **training saja**; test selalu 100% data nyata.
 
-- Dataset: `[N]` sampel, `[N]` kelas, sumber: `[rekaman sendiri / nama dataset + lisensi]`
-- Protokol split: signer-independent (grup uji: `[Sxx]`) — bukan split acak
-- Akurasi test: `[X]%` (hold-out `[Y]%`), macro-F1: `[X]%`
-- Model terpilih: `[KNN k=… / MLP …]` berdasarkan cross-validation
-- Perbandingan konfigurasi (dari `reports/benchmark_*.md`): `[tempel tabelnya]`
-- Kelas paling sering tertukar: `[mis. M ↔ N]` dan langkah perbaikannya
-- Laporan audit data: `[ringkas hasil scripts/audit_dataset.py]`
+**Model** — MLP (128–64 unit) di atas StandardScaler; seluruh inference berjalan
+di sisi klien: landmark via MediaPipe WASM, classifier via JavaScript murni.
+
+**Hasil** — akurasi **92,2%** pada hold-out 20% (macro-F1 90,3%). Verifikasi
+menyeluruh pada 510 foto gesture lewat jalur inference browser: **93,9%**.
+
+**Per huruf (verifikasi 510 gambar):** 21 huruf ≥ 95%; terlemah: B 65%, H 74%,
+K 80%, M 80%. Kekeliruan yang tersisa — B→E, K→P, M→N, H→D — adalah bentuk
+tangan yang memang serupa dalam BISINDO, bukan kegagalan acak.
+
+**Perbandingan konfigurasi** (benchmark terkontrol, split identik untuk semua):
+
+| Konfigurasi | Model | Akurasi | Δ vs baseline | Ukuran model |
+|---|---|---:|---:|---:|
+| baseline | KNN | 84,3% | — | 568 KB |
+| baseline | MLP | 84,3% | — | 340 KB |
+| augmentasi 3× | MLP | 89,2% | +4,9 poin | 366 KB |
+| **sintetis** | **MLP** | **92,2%** | **+7,9 poin** | **366 KB** |
+
+**Audit data otomatis**: distribusi seimbang (rasio 1,33×), 1 duplikat & 1 outlier
+terdeteksi dan ditangani, pasangan centroid terdekat konsisten dengan pola
+kekeliruan model.
+
+**Keterbatasan yang diakui** — dataset publik hanya mencakup 1 periset, sehingga
+angka di atas memakai split acak (bukan signer-independent). Evaluasi
+antar-periset adalah langkah validasi berikutnya; infrastrukturnya sudah siap
+(metadata periset + `StratifiedGroupKFold` di `scripts/train.py`).
 
 ---
 

@@ -14,7 +14,7 @@
  * jadi data rekaman sendiri dan dataset gambar bisa digabung untuk training.
  */
 
-import { normalizeLandmarks } from "./landmarks.js";
+import { normalizeLandmarks, predict } from "./landmarks.js";
 import { createHandLandmarker, startCamera, stopCamera, drawHand } from "./hands.js";
 
 const STORAGE_KEY = "handtalk.samples.v1";
@@ -40,6 +40,8 @@ const camStatus = $("camStatus");
 const recordHint = $("recordHint");
 const classRows = $("classRows");
 const totalStatus = $("totalStatus");
+const predLetter = $("predLetter");
+const predMeta = $("predMeta");
 const exportBtn = $("exportBtn");
 const importInput = $("importInput");
 const clearBtn = $("clearBtn");
@@ -51,7 +53,62 @@ const state = {
   rafId: null,
   lastVideoTime: -1,
   latestLandmarks: null,
+  model: null,
 };
+
+/* ----------------- model panduan + foto referensi per huruf --------------- */
+
+async function loadModel() {
+  try {
+    const res = await fetch("model.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    state.model = await res.json();
+  } catch (err) {
+    state.model = null;
+    console.warn("model.json tidak termuat — panduan prediksi nonaktif.");
+  }
+}
+
+/**
+ * Tampilkan foto referensi bentuk tangan dari dataset pelatihan.
+ * Pengguna tinggal meniru fotonya — tidak perlu bisa bahasa isyarat, dan
+ * bentuk tangan otomatis konsisten dengan distribusi data pelatihan.
+ */
+async function loadReference(letter) {
+  const box = $("refImages");
+  $("refClass").textContent = letter || "–";
+  box.innerHTML = "";
+
+  if (!/^[A-Za-z]$/.test(letter)) {
+    box.innerHTML = '<span class="ref-empty">ketik satu huruf A–Z</span>';
+    return;
+  }
+
+  try {
+    const res = await fetch(`/data/raw/${letter.toUpperCase()}/rhiosutoyo/`);
+    if (!res.ok) throw new Error(res.status);
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const files = [...doc.querySelectorAll("a")]
+      .map((a) => a.getAttribute("href"))
+      .filter((h) => h && /\.jpe?g$/i.test(h))
+      .slice(0, 3);
+
+    if (!files.length) throw new Error("tidak ada gambar");
+
+    for (const f of files) {
+      const img = document.createElement("img");
+      img.src = `/data/raw/${letter.toUpperCase()}/rhiosutoyo/${f.split("/").pop()}`;
+      img.alt = `referensi ${letter}`;
+      img.loading = "lazy";
+      box.appendChild(img);
+    }
+  } catch {
+    box.innerHTML =
+      '<span class="ref-empty">foto referensi tidak tersedia di sini — ' +
+      "salin dataset ke data/raw/&lt;HURUF&gt;/rhiosutoyo/ atau tiru dari chart BISINDO</span>";
+  }
+}
 
 /* ------------------------------ penyimpanan ------------------------------ */
 
@@ -188,9 +245,28 @@ function loop() {
     const result = state.landmarker.detectForVideo(video, performance.now());
     state.latestLandmarks = result.landmarks?.[0] || null;
     drawHand(ctx, state.latestLandmarks, overlay.width, overlay.height);
+    updatePrediction(state.latestLandmarks);
   }
 
   state.rafId = requestAnimationFrame(loop);
+}
+
+let lastPredUpdate = 0;
+function updatePrediction(landmarks) {
+  const now = performance.now();
+  if (now - lastPredUpdate < 120) return; // cukup ±8× per detik
+  lastPredUpdate = now;
+
+  if (!landmarks || !state.model) {
+    predLetter.textContent = "–";
+    predMeta.textContent = landmarks ? "model tidak termuat" : "tunjukkan tangan ke kamera";
+    return;
+  }
+
+  const r = predict(state.model, normalizeLandmarks(landmarks));
+  if (!r) return;
+  predLetter.textContent = r.label;
+  predMeta.textContent = `keyakinan ${(r.confidence * 100).toFixed(0)}%`;
 }
 
 /* ------------------------------- rekaman -------------------------------- */
@@ -407,9 +483,13 @@ classInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !recordBtn.disabled) record();
 });
 
+classInput.addEventListener("input", () => loadReference(classInput.value.trim()));
+
 video.addEventListener("resize", () => {
   overlay.width = video.videoWidth;
   overlay.height = video.videoHeight;
 });
 
 renderTable();
+loadModel();
+loadReference(classInput.value.trim() || "A");

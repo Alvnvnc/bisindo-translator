@@ -64,12 +64,26 @@
           </div>
         </div>
 
-        <div class="row" style="margin-top: 12px">
+        <div class="row" style="margin-top: 14px">
           <button id="recordBtn" class="btn btn-primary" disabled>● Rekam</button>
           <span class="hint" id="recordHint">Aktifkan kamera dulu.</span>
         </div>
         <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
         <p class="status" id="recordStatus"></p>
+
+        <div class="ref-pred-row">
+          <div class="ref-box">
+            <div class="ref-label">Referensi huruf <strong id="refClass">–</strong>
+              <span class="hint">(tiru bentuk tangannya)</span></div>
+            <div class="ref-images" id="refImages"></div>
+          </div>
+          <div class="pred-box">
+            <div class="ref-label">Model menyangka</div>
+            <div class="pred-letter" id="predLetter">–</div>
+            <div class="letter-meta" id="predMeta">tunjukkan tangan ke kamera</div>
+            <div class="hint">panduan, bukan kebenaran — model bisa keliru</div>
+          </div>
+        </div>
 
         <h2 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
                    color: var(--text-dim); margin: 22px 0 8px">
