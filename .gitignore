@@ -8,6 +8,9 @@ __pycache__/
 data/raw/
 data/samples/*.csv
 !data/samples/.gitkeep
+# Snapshot landmark hasil ekstraksi dataset publik MIT — masuk git agar
+# training bisa direproduksi tanpa mengunduh gambar aslinya.
+!data/samples/rhiosutoyo_dataset.csv
 
 # Model MediaPipe yang diunduh otomatis oleh scripts/extract_landmarks.py
 models/

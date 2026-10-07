@@ -154,17 +154,22 @@ pengguna (anak-anak vs dewasa).
 - [x] Audit kualitas data otomatis (`scripts/audit_dataset.py`)
 - [x] Data sintetis real-anchored (`scripts/generate_synthetic.py`) — hanya untuk train
 - [x] Split signer-independent & augmentasi sesuai teori (`scripts/train.py`)
+- [x] Benchmark terkontrol (`scripts/benchmark.py`)
 - [x] Uji paritas Python ↔ JavaScript (`scripts/check_parity.py`) — lulus
 - [x] Demo UI dasar: huruf besar, indikator keyakinan, transkrip, TTS `id-ID`
-- [ ] Dataset huruf alfabet BISINDO (target: ≥ 300 sampel/kelas dari ≥ 3 periset)
-- [ ] Akurasi ≥ 85% pada split **signer-independent** dengan data nyata
+- [x] **Dataset nyata: 510 landmark dari dataset BISINDO publik (MIT, paper IEEE 2023)**
+- [x] **Model v1: MLP 26 huruf, 92,2% (split acak, 1 periset — menunggu split SI)**
+- [ ] Rekaman periset baru (S01/S02) → evaluasi signer-independent yang jujur
 - [ ] Uji dengan pengguna asli + video demo
 - [ ] Mode latihan & frasa layanan (stretch)
 - [ ] Deploy live demo + submission Devpost
 
-> ⚠️ `web/model.json` dan `data/samples/synthetic.csv` saat ini berasal dari **data
-> sintetis** hasil smoke test — bukan isyarat asli. Jalankan `scripts/train.py` lagi
-> setelah dataset nyata terkumpul.
+> ℹ️ `data/samples/rhiosutoyo_dataset.csv` adalah snapshot landmark hasil ekstraksi
+> dataset publik berlisensi MIT. `web/model.json` dilatih darinya + 880 sampel
+> sintetis (`generate_synthetic.py`, train saja). Angka 92,2% memakai split acak
+> karena dataset itu hanya punya 1 periset — angka yang jujur menanti rekaman
+> periset baru.
 
-Rencana harian detail ada di [`docs/PLAN.md`](docs/PLAN.md), dan template submission
-di [`docs/devpost-submission.md`](docs/devpost-submission.md).
+Rencana harian detail ada di [`docs/PLAN.md`](docs/PLAN.md), panduan data di
+[`docs/DATA.md`](docs/DATA.md), dan template submission di
+[`docs/devpost-submission.md`](docs/devpost-submission.md).

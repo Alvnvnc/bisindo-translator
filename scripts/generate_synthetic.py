@@ -233,8 +233,9 @@ def main() -> int:
     print(f"  label sintetis cocok dengan kelasnya : {report['label_match_rate'] * 100:.1f}% (target ≥ 95%)")
     print(f"  rasio jarak sintetis/nyata           : {report['distance_ratio_mean']} (target ≈ 1.0)")
     if report["label_match_rate"] < 0.95 or (report["distance_ratio_mean"] or 0) > 1.5:
-        print("  ⚠ Kualitas sintetis rendah — jangan dipakai untuk training. "
-              "Tambah data nyata lalu jalankan ulang.")
+        print("  ⚠ Kualitas sintetis di bawah ambang — perlakukan sebagai eksperimen:")
+        print("    jalankan scripts/benchmark.py dan hanya pakai bila terbukti menaikkan")
+        print("    akurasi pada data nyata. Bila tidak, hapus file ini.")
 
     if args.dry_run:
         print("\n(dry-run: file tidak ditulis)")
