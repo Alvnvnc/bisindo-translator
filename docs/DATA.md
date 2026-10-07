@@ -1,4 +1,4 @@
-# Panduan Persiapan Data — Sasmita
+# Panduan Persiapan Data — Jemari
 
 > **Prinsip:** model bagus tidak menyelamatkan data buruk. Di project ini, kelas
 > landmark sangat kecil (63 dimensi), jadi kualitas & keberagaman data jauh lebih
@@ -15,7 +15,7 @@ Recognition (lihat WL-BISINDO di §3), dan disiplin anti-kebocoran data
 
 Mencari data tanpa spesifikasi = membuang waktu. Isi ini dulu:
 
-| Keputusan | Pilihan Sasmita | Alasan |
+| Keputusan | Pilihan Jemari | Alasan |
 |---|---|---|
 | Bahasa isyarat | **BISINDO** (bukan SIBI) | BISINDO adalah bahasa isyarat alami komunitas Tuli Indonesia; SIBI adalah sistem isyarat formal. Verifikasi klaim ini dengan sumber resmi/komunitas sebelum menuliskannya di submission. |
 | Level isyarat | **Alfabet A–Z (statis)** untuk v1 | Pipeline kita single-frame. Isyarat kata butuh urutan gerakan (time series) → beda arsitektur. |

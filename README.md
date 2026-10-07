@@ -1,12 +1,13 @@
-# Sasmita
+# Jemari
 
 **Dari isyarat jemari, menjadi suara.**
 
 🔗 **Demo live: https://alvnvnc.github.io/bisindo-translator/**
 
-*Sasmita* (KBBI: gerakan tubuh yang mempunyai isyarat tertentu; isyarat tubuh) —
-penerjemah alfabet BISINDO menjadi teks dan suara secara real-time, sepenuhnya
-di perangkat. Dibangun untuk jembatan komunikasi di layanan publik.
+*Jemari* — penerjemah alfabet BISINDO menjadi teks dan suara secara real-time,
+sepenuhnya di perangkat. Dibangun untuk jembatan komunikasi di layanan publik:
+nama ini memilih sudut pandang yang paling manusiawi, karena komunikasi justru
+hidup di jemari tangan.
 
 Aplikasi web yang menerjemahkan isyarat tangan menjadi teks dan suara secara *real-time*
 langsung di browser — tanpa server, tanpa kamera cloud, dan tetap berfungsi untuk

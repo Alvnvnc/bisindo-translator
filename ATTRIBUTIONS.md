@@ -1,4 +1,4 @@
-# Sasmita — Atribusi & Lisensi
+# Jemari — Atribusi & Lisensi
 
 Proyek ini dibangun di atas karya open-source berikut. Dicantumkan sesuai ketentuan
 lisensi masing-masing, sekaligus sebagai transparansi untuk submission Devpost.
@@ -21,7 +21,7 @@ Repo berikut dipakai sebagai **referensi arsitektur**, bukan disalin:
 - `daf2a/Sign_Language_Translator_Web_App` — pola MediaPipe di web app
 - `gabguerin/Sign-Language-Recognition--MediaPipe-DTW` — landmark → klasifikasi
 
-Seluruh kode di repo ini ditulis sendiri oleh tim Sasmita, kecuali yang
+Seluruh kode di repo ini ditulis sendiri oleh tim Jemari, kecuali yang
 disebutkan pada tabel di atas.
 
 ## Dataset
@@ -35,4 +35,4 @@ disebutkan pada tabel di atas.
 
 ## Lisensi proyek ini
 
-Kode Sasmita dirilis di bawah **MIT License** — lihat `LICENSE`.
+Kode Jemari dirilis di bawah **MIT License** — lihat `LICENSE`.

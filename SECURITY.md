@@ -1,4 +1,4 @@
-# Keamanan & Privasi — Sasmita
+# Keamanan & Privasi — Jemari
 
 ## Tanpa rahasia, by design
 

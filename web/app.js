@@ -1,5 +1,5 @@
 /**
- * Sasmita — demo terjemahan real-time.
+ * Jemari — demo terjemahan real-time.
  * Alur: kamera → MediaPipe landmark → normalize → classifier → smoothing → UI/TTS.
  */
 

@@ -1,4 +1,4 @@
-# Draft Submission Devpost — Sasmita
+# Draft Submission Devpost — Jemari
 
 Template ini mengikuti persis field yang diminta panitia. Isi bagian `[...]`,
 **verifikasi setiap angka dari sumber resmi** sebelum menyalin ke Devpost.
@@ -7,14 +7,14 @@ Template ini mengikuti persis field yang diminta panitia. Isi bagian `[...]`,
 
 ## Project Title
 
-**Sasmita** — dari isyarat jemari, menjadi suara
+**Jemari** — dari isyarat jemari, menjadi suara
 
-Nama diambil dari KBBI: *sasmita* — "gerakan bagian tubuh, seperti tangan, lengan,
-bahu, kepala, mata, dan sebagainya, yang mempunyai isyarat tertentu; isyarat
-tubuh". Persis mendeskripsikan apa yang dilakukan aplikasi ini: membaca gerakan
-jemari lalu menghadirkan suara.
+Nama "Jemari" dipilih karena di situlah bahasa isyarat hidup: pada jemari yang
+bergerak. Aplikasi ini membaca gerakan tersebut dan menghadirkan suara —
+real-time, sepenuhnya di perangkat.
 
-*(Alternatif bila nama sudah dipakai peserta lain: "Jemari", "TanganBicara")*
+*(Alternatif bila nama sudah dipakai peserta lain: "TanganBicara", "Sasmita"
+(KBBI: isyarat tubuh))*
 
 ---
 
@@ -26,7 +26,7 @@ ML Empowerment Build Challenge 3.0 — kategori bebas (tidak ada tema wajib).
 
 ## What it does
 
-Sasmita menerjemahkan isyarat tangan Bahasa Isyarat Indonesia menjadi teks dan
+Jemari menerjemahkan isyarat tangan Bahasa Isyarat Indonesia menjadi teks dan
 suara secara real-time, langsung di browser. Pengguna cukup menyalakan kamera dan
 memberi isyarat; huruf demi huruf muncul dan bisa langsung diucapkan dengan suara
 bahasa Indonesia agar lawan bicara yang tidak memahami bahasa isyarat tetap bisa
@@ -57,7 +57,7 @@ dokumen menjadi pengalaman yang melelahkan dan bergantung pada orang lain.
 
 ## Solution Overview
 
-Sasmita mengubah kamera ponsel atau laptop menjadi penerjemah isyarat yang
+Jemari mengubah kamera ponsel atau laptop menjadi penerjemah isyarat yang
 selalu tersedia, tanpa aplikasi khusus dan tanpa biaya langganan:
 
 1. **Deteksi tangan** — MediaPipe Hand Landmarker mengekstrak 21 titik kunci tangan
