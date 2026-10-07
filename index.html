@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sasmita — Dari isyarat jemari, menjadi suara</title>
+    <meta
+      name="description"
+      content="Sasmita menerjemahkan alfabet BISINDO menjadi teks dan suara secara real-time, sepenuhnya di perangkat — tanpa server, tanpa akun, tanpa data yang terkirim."
+    />
+    <style>
+      :root {
+        --bg: #0f1115;
+        --surface: #171a21;
+        --surface-2: #1e222b;
+        --border: #2a2f3a;
+        --text: #e8eaf0;
+        --text-dim: #9aa3b2;
+        --accent: #4f8cff;
+        --accent-soft: rgba(79, 140, 255, 0.14);
+        --success: #3ddc97;
+        --radius: 16px;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+        line-height: 1.6;
+      }
+      .wrap { max-width: 1020px; margin: 0 auto; padding: 0 24px; }
+      nav {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px 0; border-bottom: 1px solid var(--border);
+      }
+      .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; }
+      .brand span.mark { font-size: 24px; }
+      nav a { color: var(--text-dim); text-decoration: none; font-size: 14px; margin-left: 18px; }
+      nav a:hover { color: var(--text); }
+      header.hero { text-align: center; padding: 84px 0 56px; }
+      .logo { font-size: 64px; line-height: 1; }
+      h1 { font-size: clamp(40px, 7vw, 64px); margin: 18px 0 8px; letter-spacing: -0.03em; }
+      .tagline { font-size: clamp(17px, 2.6vw, 21px); color: var(--text); margin: 0 0 10px; font-weight: 550; }
+      .sub { color: var(--text-dim); max-width: 640px; margin: 0 auto 30px; font-size: 15.5px; }
+      .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+      .btn {
+        display: inline-block; padding: 13px 26px; border-radius: 12px; font-weight: 600;
+        text-decoration: none; font-size: 15px; border: 1px solid var(--border);
+        color: var(--text); background: var(--surface-2); transition: border-color .15s;
+      }
+      .btn:hover { border-color: var(--accent); }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .btn.primary:hover { background: #3d7bf0; }
+      .chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 34px; }
+      .chip {
+        font-size: 13px; color: var(--text-dim); background: var(--surface);
+        border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px;
+      }
+      .chip b { color: var(--text); font-variant-numeric: tabular-nums; }
+      section.blocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; padding: 30px 0 10px; }
+      .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+      .card h2 { font-size: 16px; margin: 6px 0 8px; }
+      .card p { margin: 0; color: var(--text-dim); font-size: 14px; }
+      .card .ico { font-size: 26px; }
+      section.name { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; margin: 34px 0; }
+      section.name h2 { font-size: 16px; margin: 0 0 8px; }
+      section.name p { margin: 0; color: var(--text-dim); font-size: 14.5px; }
+      section.name em { color: var(--text); }
+      footer {
+        border-top: 1px solid var(--border); margin-top: 40px; padding: 22px 0 34px;
+        color: var(--text-dim); font-size: 13px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      }
+      footer a { color: var(--text-dim); }
+      @media (max-width: 640px) { header.hero { padding: 56px 0 40px; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav>
+        <div class="brand"><span class="mark">🤟</span> Sasmita</div>
+        <div>
+          <a href="web/index.html">Demo</a>
+          <a href="web/capture.html">Rekam &amp; Latih</a>
+          <a href="https://github.com/Alvnvnc/sasmita" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </nav>
+
+      <header class="hero">
+        <div class="logo">🤟</div>
+        <h1>Sasmita</h1>
+        <p class="tagline">Dari isyarat jemari, menjadi suara.</p>
+        <p class="sub">
+          Penerjemah alfabet BISINDO menjadi teks dan suara secara real-time —
+          sepenuhnya berjalan di perangkat Anda. Dibuat untuk jembatan komunikasi
+          di layanan publik: puskesmas, kantor desa, bank, sekolah.
+        </p>
+        <div class="cta">
+          <a class="btn primary" href="web/index.html">🚀 Coba Demo Live</a>
+          <a class="btn" href="web/capture.html">🎥 Rekam &amp; Latih</a>
+        </div>
+        <div class="chips">
+          <span class="chip"><b>26</b> huruf BISINDO</span>
+          <span class="chip"><b>92,2%</b> akurasi hold-out</span>
+          <span class="chip"><b>0</b> byte video terkirim</span>
+          <span class="chip">model <b>366 KB</b></span>
+          <span class="chip">tanpa akun &amp; tanpa API key</span>
+        </div>
+      </header>
+
+      <section class="blocks">
+        <div class="card">
+          <div class="ico">📷</div>
+          <h2>Kamera → landmark</h2>
+          <p>MediaPipe Hand Landmarker mengekstrak 21 titik tangan per frame, langsung di browser (WASM/WebGL).</p>
+        </div>
+        <div class="card">
+          <div class="ico">🧠</div>
+          <h2>Classifier hasil latihan sendiri</h2>
+          <p>MLP kecil (366 KB) dilatih pada data BISINDO nyata, dijalankan penuh di sisi klien — bukan panggilan API.</p>
+        </div>
+        <div class="card">
+          <div class="ico">🔊</div>
+          <h2>Teks &amp; suara Indonesia</h2>
+          <p>Hasil terjemahan ditampilkan besar dan dapat diucapkan lewat Web Speech API bahasa Indonesia.</p>
+        </div>
+        <div class="card">
+          <div class="ico">🔒</div>
+          <h2>Privasi by design</h2>
+          <p>Video tidak pernah meninggalkan perangkat. Tidak ada server, tidak ada API key, tidak ada pelacakan.</p>
+        </div>
+        <div class="card">
+          <div class="ico">📖</div>
+          <h2>Terbuka &amp; bisa direproduksi</h2>
+          <p>Kode MIT, dataset publik berlisensi, data landmark &amp; metrik evaluasi tersedia di repo. Audit data otomatis.</p>
+        </div>
+        <div class="card">
+          <div class="ico">🤝</div>
+          <h2>Dibangun untuk dipercaya</h2>
+          <p>Split &amp; benchmark terkontrol, laporan terbuka, dan keterbatasan diakui apa adanya di dokumentasi.</p>
+        </div>
+      </section>
+
+      <section class="name">
+        <h2>Kenapa “Sasmita”?</h2>
+        <p>
+          <em>Sasmita</em> tercatat di KBBI: “gerakan bagian tubuh, seperti tangan, lengan, bahu,
+          kepala, mata, dan sebagainya, yang mempunyai isyarat tertentu; isyarat tubuh”.
+          Persis itulah yang dilakukan aplikasi ini — membaca gerakan jemari lalu
+          menghadirkan suara.
+        </p>
+      </section>
+
+      <footer>
+        <span>Sasmita · ML Empowerment Build Challenge 3.0</span>
+        <span>Kode: MIT · MediaPipe &amp; dataset: kredit di <a href="ATTRIBUTIONS.md">ATTRIBUTIONS.md</a></span>
+      </footer>
+    </div>
+  </body>
+</html>

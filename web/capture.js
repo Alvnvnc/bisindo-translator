@@ -69,10 +69,14 @@ async function loadModel() {
   }
 }
 
+let refManifest = null;
+
 /**
  * Tampilkan foto referensi bentuk tangan dari dataset pelatihan.
  * Pengguna tinggal meniru fotonya — tidak perlu bisa bahasa isyarat, dan
  * bentuk tangan otomatis konsisten dengan distribusi data pelatihan.
+ * Sumber utama: web/ref/ (manifest index.json) — bekerja di GitHub Pages;
+ * fallback pengembangan lokal: ../data/raw/<HURUF>/rhiosutoyo/.
  */
 async function loadReference(letter) {
   const box = $("refImages");
@@ -83,9 +87,36 @@ async function loadReference(letter) {
     box.innerHTML = '<span class="ref-empty">ketik satu huruf A–Z</span>';
     return;
   }
+  const K = letter.toUpperCase();
 
+  const render = (files, base) => {
+    for (const f of files) {
+      const img = document.createElement("img");
+      img.src = `${base}/${f.split("/").pop()}`;
+      img.alt = `referensi ${K}`;
+      img.loading = "lazy";
+      box.appendChild(img);
+    }
+  };
+
+  // 1) Produksi & lokal: manifest thumbnail yang di-commit
   try {
-    const res = await fetch(`/data/raw/${letter.toUpperCase()}/rhiosutoyo/`);
+    if (!refManifest) {
+      const mres = await fetch("ref/index.json", { cache: "no-store" });
+      if (!mres.ok) throw new Error("manifest tidak tersedia");
+      refManifest = await mres.json();
+    }
+    const files = refManifest[K] || [];
+    if (!files.length) throw new Error("huruf tidak ada di manifest");
+    render(files, `ref/${K}`);
+    return;
+  } catch {
+    /* lanjut ke fallback */
+  }
+
+  // 2) Fallback pengembangan lokal: listing folder dataset mentah
+  try {
+    const res = await fetch(`../data/raw/${K}/rhiosutoyo/`);
     if (!res.ok) throw new Error(res.status);
     const html = await res.text();
     const doc = new DOMParser().parseFromString(html, "text/html");
@@ -93,20 +124,12 @@ async function loadReference(letter) {
       .map((a) => a.getAttribute("href"))
       .filter((h) => h && /\.jpe?g$/i.test(h))
       .slice(0, 3);
-
-    if (!files.length) throw new Error("tidak ada gambar");
-
-    for (const f of files) {
-      const img = document.createElement("img");
-      img.src = `/data/raw/${letter.toUpperCase()}/rhiosutoyo/${f.split("/").pop()}`;
-      img.alt = `referensi ${letter}`;
-      img.loading = "lazy";
-      box.appendChild(img);
-    }
+    if (!files.length) throw new Error("kosong");
+    render(files, `../data/raw/${K}/rhiosutoyo`);
   } catch {
     box.innerHTML =
-      '<span class="ref-empty">foto referensi tidak tersedia di sini — ' +
-      "salin dataset ke data/raw/&lt;HURUF&gt;/rhiosutoyo/ atau tiru dari chart BISINDO</span>";
+      '<span class="ref-empty">referensi tidak tersedia — salin dataset ke ' +
+      "data/raw/&lt;HURUF&gt;/rhiosutoyo/ atau tiru dari chart BISINDO</span>";
   }
 }
 
