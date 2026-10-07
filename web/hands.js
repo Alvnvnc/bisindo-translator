@@ -7,6 +7,10 @@ const MP_CDN = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSIO
 const MODEL_URL =
   "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
 
+// ?delegate=cpu — paksa CPU (untuk perangkat dengan GPU/WebGL bermasalah).
+const PREFERRED_DELEGATE =
+  new URLSearchParams(location.search).get("delegate") === "cpu" ? "CPU" : "GPU";
+
 /**
  * Buat instance HandLandmarker. Mencoba GPU (WebGL) dulu, lalu fallback ke CPU.
  * @returns {Promise<import('@mediapipe/tasks-vision').HandLandmarker>}
@@ -27,10 +31,11 @@ export async function createHandLandmarker() {
   try {
     return await vision.HandLandmarker.createFromOptions(fileset, {
       ...base,
-      baseOptions: { ...base.baseOptions, delegate: "GPU" },
+      baseOptions: { ...base.baseOptions, delegate: PREFERRED_DELEGATE },
     });
   } catch (err) {
-    console.warn("GPU delegate gagal, fallback ke CPU:", err);
+    if (PREFERRED_DELEGATE === "CPU") throw err;
+    console.warn(`${PREFERRED_DELEGATE} delegate gagal, fallback ke CPU:`, err);
     return await vision.HandLandmarker.createFromOptions(fileset, {
       ...base,
       baseOptions: { ...base.baseOptions, delegate: "CPU" },

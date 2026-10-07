@@ -29,3 +29,6 @@ reports/
 
 # Rahasia
 .env
+
+# Aset video lokal (diupload manual ke Devpost, tidak masuk git)
+video/

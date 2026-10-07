@@ -145,11 +145,21 @@ export class TemporalSmoother {
     this.minVotes = minVotes;
     this.minConfidence = minConfidence;
     this.buffer = [];
+    this.blocked = null; // huruf terakhir yang sudah di-commit
   }
 
   /** @returns {{label:string, confidence:number}|null} label yang sudah stabil */
   push(prediction) {
-    if (!prediction || prediction.confidence < this.minConfidence) return null;
+    if (!prediction || prediction.confidence < this.minConfidence) {
+      // Jeda (tangan keluar / gestur transisi) membuka blokir pengulangan.
+      this.blocked = null;
+      return null;
+    }
+
+    // Jangan meng-commit huruf yang sama dua kali berturut-turut: pengguna
+    // yang menahan pose tidak boleh mendapat "AAAA" di transkrip.
+    if (this.blocked === prediction.label) return null;
+    this.blocked = null;
 
     this.buffer.push(prediction);
     if (this.buffer.length > this.windowSize) this.buffer.shift();
@@ -171,10 +181,12 @@ export class TemporalSmoother {
     if (!best || best.count < this.minVotes) return null;
 
     this.buffer = []; // reset supaya huruf berikutnya butuh gestur baru
+    this.blocked = best.label;
     return { label: best.label, confidence: best.conf };
   }
 
   reset() {
     this.buffer = [];
+    this.blocked = null;
   }
 }

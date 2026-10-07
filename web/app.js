@@ -30,7 +30,13 @@ const state = {
   model: null,
   landmarker: null,
   running: false,
-  smoother: new TemporalSmoother(),
+  smoother: new TemporalSmoother({
+    // ?minconf=0.4 — longgarkan/ketatkan ambang (untuk perangkat lambat).
+    minConfidence: Math.min(
+      Math.max(parseFloat(new URLSearchParams(location.search).get("minconf")) || 0.55, 0.1),
+      0.95,
+    ),
+  }),
   transcript: "",
   rafId: null,
   lastVideoTime: -1,
